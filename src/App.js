@@ -5,6 +5,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import './index.css';
 
+import LandingPage from './pages/LandingPage';
+import CadastroPage from './pages/CadastroPage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import IndicarPacientePage from './pages/IndicarPacientePage';
@@ -24,8 +26,10 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          {/* Páginas PÚBLICAS — sem login */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/cadastro" element={<CadastroPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={<Navigate to="/login" replace />} />
 
           {/* Gestora + Pastor */}
           <Route path="/dashboard" element={
@@ -53,8 +57,6 @@ export default function App() {
               <RelatorioProjetoPage />
             </ProtectedRoute>
           } />
-
-          {/* Indicar Paciente */}
           <Route path="/indicar" element={
             <ProtectedRoute allowedRoles={['gestora', 'pastor', 'profissional']}>
               <IndicarPacientePage />
@@ -107,7 +109,7 @@ export default function App() {
             </ProtectedRoute>
           } />
 
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
