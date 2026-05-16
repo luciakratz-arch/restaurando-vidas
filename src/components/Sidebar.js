@@ -3,41 +3,12 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth, ROLES } from '../contexts/AuthContext';
 
-const ICONS = {
-  dashboard: '◈',
-  patients: '♡',
-  clinical: '✦',
-  reports: '◎',
-  users: '❋',
-  interconsulta: '⟳',
-  perfil: '◉',
-  logout: '→',
-};
-
-function NavItem({ icon, label, path, active, onClick }) {
-  return (
-    <div
-      className={`nav-item ${active ? 'active' : ''}`}
-      onClick={onClick}
-    >
-      <span style={{ fontSize: 16, color: active ? 'var(--gold)' : 'var(--text-muted)' }}>
-        {icon}
-      </span>
-      <span>{label}</span>
-    </div>
-  );
-}
-
 export default function Sidebar({ pendingCount = 0 }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { userProfile, logout, isGestora, isPastor, isAluno, isProfissional } = useAuth();
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
-
+  const handleLogout = async () => { await logout(); navigate('/login'); };
   const nav = (path) => navigate(path);
   const at = (path) => location.pathname === path;
 
@@ -48,6 +19,13 @@ export default function Sidebar({ pendingCount = 0 }) {
     [ROLES.PROFISSIONAL]: 'Prof. de Saúde',
   }[userProfile?.role] || 'Usuário';
 
+  const NavItem = ({ icon, label, path }) => (
+    <div className={`nav-item ${at(path) ? 'active' : ''}`} onClick={() => nav(path)}>
+      <span style={{ fontSize: 16, color: at(path) ? 'var(--gold)' : 'var(--text-muted)' }}>{icon}</span>
+      <span>{label}</span>
+    </div>
+  );
+
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
@@ -56,34 +34,35 @@ export default function Sidebar({ pendingCount = 0 }) {
       </div>
 
       <nav className="sidebar-nav">
-        {/* Gestora & Pastores */}
+        {/* Todos os perfis */}
+        <span className="nav-section-title">Projeto</span>
+        <NavItem icon="🏠" label="Página Inicial" path="/pagina-inicial" />
+        <NavItem icon="❋" label="Equipe e Parceiros" path="/participantes" />
+
+        {/* Gestora + Pastor */}
         {(isGestora || isPastor) && (
           <>
             <span className="nav-section-title">Gestão</span>
-            <NavItem icon={ICONS.dashboard} label="Dashboard" path="/dashboard"
-              active={at('/dashboard')} onClick={() => nav('/dashboard')} />
+            <NavItem icon="◈" label="Dashboard" path="/dashboard" />
+            <NavItem icon="★" label="Avaliações" path="/avaliacoes" />
+            <NavItem icon="📊" label="Relatórios do Projeto" path="/relatorios-projeto" />
           </>
         )}
 
-        {/* Indicação — Pastores, Gestora, Profissionais */}
+        {/* Indicar paciente */}
         {(isGestora || isPastor || isProfissional) && (
-          <NavItem icon={ICONS.patients} label="Indicar Paciente" path="/indicar"
-            active={at('/indicar')} onClick={() => nav('/indicar')} />
+          <NavItem icon="♡" label="Indicar Paciente" path="/indicar" />
         )}
 
-        {/* Gestora only */}
+        {/* Gestora */}
         {isGestora && (
           <>
             <span className="nav-section-title">Clínica</span>
-            <NavItem icon={ICONS.clinical} label="Prontuários" path="/prontuarios"
-              active={at('/prontuarios')} onClick={() => nav('/prontuarios')} />
-            <NavItem icon={ICONS.interconsulta} label={`Interconsultas${pendingCount > 0 ? ` (${pendingCount})` : ''}`}
-              path="/interconsultas" active={at('/interconsultas')} onClick={() => nav('/interconsultas')} />
-            <NavItem icon={ICONS.reports} label="Relatórios" path="/relatorios"
-              active={at('/relatorios')} onClick={() => nav('/relatorios')} />
+            <NavItem icon="📋" label="Prontuários" path="/prontuarios" />
+            <NavItem icon={`⟳${pendingCount > 0 ? ` (${pendingCount})` : ''}`} label="Interconsultas" path="/interconsultas" />
+            <NavItem icon="◎" label="Relatórios Clínicos" path="/relatorios" />
             <span className="nav-section-title">Admin</span>
-            <NavItem icon={ICONS.users} label="Usuários" path="/usuarios"
-              active={at('/usuarios')} onClick={() => nav('/usuarios')} />
+            <NavItem icon="❋" label="Usuários" path="/usuarios" />
           </>
         )}
 
@@ -91,12 +70,9 @@ export default function Sidebar({ pendingCount = 0 }) {
         {isAluno && (
           <>
             <span className="nav-section-title">Clínica</span>
-            <NavItem icon={ICONS.clinical} label="Meus Atendimentos" path="/atendimentos"
-              active={at('/atendimentos')} onClick={() => nav('/atendimentos')} />
-            <NavItem icon={ICONS.interconsulta} label="Solicitar Especialista" path="/solicitar-especialista"
-              active={at('/solicitar-especialista')} onClick={() => nav('/solicitar-especialista')} />
-            <NavItem icon={ICONS.reports} label="Relatórios" path="/meus-relatorios"
-              active={at('/meus-relatorios')} onClick={() => nav('/meus-relatorios')} />
+            <NavItem icon="📋" label="Meus Atendimentos" path="/atendimentos" />
+            <NavItem icon="⟳" label="Solicitar Especialista" path="/solicitar-especialista" />
+            <NavItem icon="◎" label="Meus Relatórios" path="/meus-relatorios" />
           </>
         )}
 
@@ -104,23 +80,27 @@ export default function Sidebar({ pendingCount = 0 }) {
         {isProfissional && (
           <>
             <span className="nav-section-title">Clínica</span>
-            <NavItem icon={ICONS.clinical} label="Meus Pacientes" path="/meus-pacientes"
-              active={at('/meus-pacientes')} onClick={() => nav('/meus-pacientes')} />
-            <NavItem icon={ICONS.reports} label="Relatórios" path="/meus-relatorios"
-              active={at('/meus-relatorios')} onClick={() => nav('/meus-relatorios')} />
+            <NavItem icon="📋" label="Meus Pacientes" path="/meus-pacientes" />
+            <NavItem icon="◎" label="Relatórios" path="/meus-relatorios" />
+          </>
+        )}
+
+        {/* Pastor */}
+        {isPastor && (
+          <>
+            <span className="nav-section-title">Acompanhamento</span>
+            <NavItem icon="★" label="Ver Avaliações" path="/avaliacoes" />
           </>
         )}
       </nav>
 
       <div className="sidebar-footer">
         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>
-          <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
-            {userProfile?.nome || 'Usuário'}
-          </div>
+          <div style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{userProfile?.nome || 'Usuário'}</div>
           <div>{roleLabel}</div>
         </div>
         <button className="btn btn-outline btn-sm" style={{ width: '100%' }} onClick={handleLogout}>
-          {ICONS.logout} Sair
+          → Sair
         </button>
       </div>
     </aside>

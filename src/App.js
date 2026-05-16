@@ -5,7 +5,6 @@ import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import './index.css';
 
-// Pages
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import IndicarPacientePage from './pages/IndicarPacientePage';
@@ -14,32 +13,17 @@ import RelatoriosPage from './pages/RelatoriosPage';
 import UsuariosPage from './pages/UsuariosPage';
 import SolicitarEspecialistaPage from './pages/SolicitarEspecialistaPage';
 import MeusRelatoriosPage from './pages/MeusRelatoriosPage';
-
-// Página placeholder simples para módulos em desenvolvimento
-function PlaceholderPage({ titulo }) {
-  const { useAuth } = require('./contexts/AuthContext');
-  const Layout = require('./components/Layout').default;
-  return (
-    <Layout>
-      <div style={{ textAlign: 'center', padding: '80px 20px' }}>
-        <div style={{ fontSize: 48, color: 'var(--gold)', marginBottom: 16 }}>◈</div>
-        <h1 style={{ fontSize: 24, marginBottom: 8 }}>{titulo}</h1>
-        <p style={{ color: 'var(--text-muted)' }}>Módulo em desenvolvimento</p>
-      </div>
-    </Layout>
-  );
-}
-
-function AtendimentosPage() { return <PlaceholderPage titulo="Meus Atendimentos" />; }
-function MeusPacientesPage() { return <PlaceholderPage titulo="Meus Pacientes" />; }
-function ProntuariosPage() { return <PlaceholderPage titulo="Prontuários" />; }
+import ProntuariosPage from './pages/ProntuariosPage';
+import PaginaInicialPage from './pages/PaginaInicialPage';
+import AvaliacaoPage from './pages/AvaliacaoPage';
+import ParticipantesPage from './pages/ParticipantesPage';
+import RelatorioProjetoPage from './pages/RelatorioProjetoPage';
 
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Público */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
 
@@ -49,8 +33,28 @@ export default function App() {
               <DashboardPage />
             </ProtectedRoute>
           } />
+          <Route path="/pagina-inicial" element={
+            <ProtectedRoute allowedRoles={['gestora', 'pastor', 'aluno', 'profissional']}>
+              <PaginaInicialPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/participantes" element={
+            <ProtectedRoute allowedRoles={['gestora', 'pastor', 'aluno', 'profissional']}>
+              <ParticipantesPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/avaliacoes" element={
+            <ProtectedRoute allowedRoles={['gestora', 'pastor']}>
+              <AvaliacaoPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/relatorios-projeto" element={
+            <ProtectedRoute allowedRoles={['gestora', 'pastor']}>
+              <RelatorioProjetoPage />
+            </ProtectedRoute>
+          } />
 
-          {/* Indicar Paciente — Gestora, Pastor, Profissional */}
+          {/* Indicar Paciente */}
           <Route path="/indicar" element={
             <ProtectedRoute allowedRoles={['gestora', 'pastor', 'profissional']}>
               <IndicarPacientePage />
@@ -74,7 +78,7 @@ export default function App() {
             </ProtectedRoute>
           } />
           <Route path="/prontuarios" element={
-            <ProtectedRoute allowedRoles={['gestora']}>
+            <ProtectedRoute allowedRoles={['gestora', 'aluno', 'profissional']}>
               <ProntuariosPage />
             </ProtectedRoute>
           } />
@@ -82,7 +86,7 @@ export default function App() {
           {/* Aluno */}
           <Route path="/atendimentos" element={
             <ProtectedRoute allowedRoles={['aluno']}>
-              <AtendimentosPage />
+              <ProntuariosPage />
             </ProtectedRoute>
           } />
           <Route path="/solicitar-especialista" element={
@@ -99,11 +103,10 @@ export default function App() {
           {/* Profissional */}
           <Route path="/meus-pacientes" element={
             <ProtectedRoute allowedRoles={['profissional']}>
-              <MeusPacientesPage />
+              <ProntuariosPage />
             </ProtectedRoute>
           } />
 
-          {/* 404 */}
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>
