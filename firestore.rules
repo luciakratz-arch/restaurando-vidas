@@ -1,0 +1,70 @@
+// firestore.rules
+// Cole estas regras no Console Firebase > Firestore > Rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Função auxiliar: verifica role do usuário autenticado
+    function getUser() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function isGestora() {
+      return request.auth != null && getUser().role == 'gestora';
+    }
+    function isPastor() {
+      return request.auth != null && getUser().role == 'pastor';
+    }
+    function isAluno() {
+      return request.auth != null && getUser().role == 'aluno';
+    }
+    function isProfissional() {
+      return request.auth != null && getUser().role == 'profissional';
+    }
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // ── Users ──────────────────────────────────────────────
+    match /users/{uid} {
+      allow read: if isAuthenticated();
+      allow create: if isGestora();
+      allow update: if isGestora() || request.auth.uid == uid;
+      allow delete: if false; // nunca deletar usuários
+    }
+
+    // ── Pacientes ──────────────────────────────────────────
+    match /pacientes/{pacienteId} {
+      allow read: if isAuthenticated();
+      allow create: if isGestora() || isPastor() || isProfissional();
+      allow update: if isGestora() || isAluno();
+      allow delete: if isGestora();
+    }
+
+    // ── Interconsultas ─────────────────────────────────────
+    match /interconsultas/{id} {
+      allow read: if isAuthenticated();
+      // Aluno cria a solicitação
+      allow create: if isAluno();
+      // Gestora aprova ou rejeita
+      allow update: if isGestora() ||
+                       (isAluno() && resource.data.alunoId == request.auth.uid && resource.data.status == 'pendente');
+      allow delete: if isGestora();
+    }
+
+    // ── Relatórios ─────────────────────────────────────────
+    match /relatorios/{id} {
+      // Gestora vê todos; aluno/profissional vê apenas aprovados ou os seus
+      allow read: if isGestora() ||
+                     (isAluno() && resource.data.alunoId == request.auth.uid) ||
+                     (isProfissional() && resource.data.status == 'aprovado') ||
+                     (isPastor() && resource.data.status == 'aprovado');
+      // Aluno cria
+      allow create: if isAluno();
+      // Gestora edita (adiciona obs, aprova); aluno edita rascunho próprio
+      allow update: if isGestora() ||
+                       (isAluno() && resource.data.alunoId == request.auth.uid && resource.data.status != 'aprovado');
+      allow delete: if isGestora();
+    }
+  }
+}
