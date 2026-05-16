@@ -5,7 +5,6 @@
 
 ---
 
-
 ## Stack Tecnológica
 
 | Camada | Tecnologia |
