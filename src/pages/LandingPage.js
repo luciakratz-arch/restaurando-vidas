@@ -1,7 +1,7 @@
 // src/pages/LandingPage.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, query, where, onSnapshot, orderBy, doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
 
 function Estrelas({ n }) {
@@ -19,22 +19,56 @@ export default function LandingPage() {
   const [avaliacoes, setAvaliacoes] = useState([]);
   const [dados, setDados] = useState({ historia: '', missao: '', timeline: [] });
   const [participantes, setParticipantes] = useState([]);
+  const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
-    // Avaliações aprovadas
-    const q = query(collection(db, 'avaliacoes'), where('aprovada', '==', true), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, (s) => setAvaliacoes(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+    async function carregar() {
+      try {
+        // Dados da página inicial
+        const snapPagina = await getDoc(doc(db, 'projeto', 'pagina_inicial'));
+        if (snapPagina.exists()) {
+          setDados(snapPagina.data());
+        }
+      } catch (e) {
+        console.error('Erro ao carregar página inicial:', e);
+      }
 
-    // Dados da página
-    getDoc(doc(db, 'projeto', 'pagina_inicial')).then(snap => {
-      if (snap.exists()) setDados(snap.data());
-    });
+      try {
+        // Responsáveis técnicos
+        const qP = query(
+          collection(db, 'participantes'),
+          where('tipo', '==', 'responsavel_tecnico'),
+          where('ativo', '==', true)
+        );
+        const snapP = await getDocs(qP);
+        setParticipantes(snapP.docs.map(d => ({ id: d.id, ...d.data() })));
+      } catch (e) {
+        console.error('Erro ao carregar participantes:', e);
+      }
 
-    // Responsáveis técnicos
-    const qP = query(collection(db, 'participantes'), where('tipo', '==', 'responsavel_tecnico'), where('ativo', '==', true));
-    const unsubP = onSnapshot(qP, (s) => setParticipantes(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+      try {
+        // Avaliações aprovadas (sem orderBy para evitar índice composto)
+        const qA = query(
+          collection(db, 'avaliacoes'),
+          where('aprovada', '==', true)
+        );
+        const snapA = await getDocs(qA);
+        const lista = snapA.docs.map(d => ({ id: d.id, ...d.data() }));
+        // Ordena no cliente
+        lista.sort((a, b) => {
+          const ta = a.createdAt?.seconds || 0;
+          const tb = b.createdAt?.seconds || 0;
+          return tb - ta;
+        });
+        setAvaliacoes(lista);
+      } catch (e) {
+        console.error('Erro ao carregar avaliações:', e);
+      }
 
-    return () => { unsub(); unsubP(); };
+      setCarregando(false);
+    }
+
+    carregar();
   }, []);
 
   return (
@@ -57,7 +91,7 @@ export default function LandingPage() {
         zIndex: 100,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <img src="/restaurando-vidas/logo.png" alt="Logo"
+          <img src="/restaurando-vidas/logo.jpeg" alt="Logo"
             onError={(e) => { e.target.style.display = 'none'; }}
             style={{ height: 48 }} />
           <div>
@@ -96,7 +130,7 @@ export default function LandingPage() {
         background: 'radial-gradient(circle at 50% 50%, rgba(212,175,55,0.08) 0%, transparent 70%)',
         borderBottom: '1px solid rgba(212,175,55,0.1)',
       }}>
-        <img src="/restaurando-vidas/logo.png" alt="Logo"
+        <img src="/restaurando-vidas/logo.jpeg" alt="Logo"
           onError={(e) => { e.target.style.display = 'none'; }}
           style={{ width: 140, marginBottom: 32 }} />
         <h1 style={{
@@ -131,8 +165,15 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Carregando */}
+      {carregando && (
+        <section style={{ padding: '60px 40px', textAlign: 'center' }}>
+          <div style={{ color: '#D4AF37', fontSize: 16 }}>Carregando informações do projeto...</div>
+        </section>
+      )}
+
       {/* História e Missão */}
-      {(dados.historia || dados.missao) && (
+      {!carregando && (dados.historia || dados.missao) && (
         <section style={{ padding: '80px 40px', maxWidth: 1100, margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
             {dados.historia && (
@@ -156,7 +197,7 @@ export default function LandingPage() {
       )}
 
       {/* Linha do Tempo */}
-      {dados.timeline?.length > 0 && (
+      {!carregando && dados.timeline?.length > 0 && (
         <section style={{ padding: '60px 40px', background: '#0f0f0f', borderTop: '1px solid rgba(212,175,55,0.1)', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>
           <div style={{ maxWidth: 800, margin: '0 auto' }}>
             <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 24, color: '#D4AF37', marginBottom: 40, textAlign: 'center' }}>
@@ -181,7 +222,7 @@ export default function LandingPage() {
       )}
 
       {/* Responsáveis Técnicos */}
-      {participantes.length > 0 && (
+      {!carregando && participantes.length > 0 && (
         <section style={{ padding: '80px 40px', maxWidth: 1100, margin: '0 auto' }}>
           <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 24, color: '#D4AF37', marginBottom: 40, textAlign: 'center' }}>
             Responsáveis Técnicos
@@ -203,7 +244,7 @@ export default function LandingPage() {
       )}
 
       {/* Avaliações */}
-      {avaliacoes.length > 0 && (
+      {!carregando && avaliacoes.length > 0 && (
         <section style={{ padding: '80px 40px', background: '#0f0f0f', borderTop: '1px solid rgba(212,175,55,0.1)' }}>
           <div style={{ maxWidth: 1100, margin: '0 auto' }}>
             <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 24, color: '#D4AF37', marginBottom: 40, textAlign: 'center' }}>
