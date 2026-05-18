@@ -68,7 +68,7 @@ export default function LandingPage() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <img src="/restaurando-vidas/logo.jpeg" alt="Logo"
-            onError={(e) => { e.target.style.display = 'none'; }}
+            onError={(e) => { e.target.src = '/restaurando-vidas/logo.png'; }}
             style={{ height: 48 }} />
           <div>
             <div style={{ fontFamily: 'Cinzel, serif', fontSize: 18, color: '#D4AF37', fontWeight: 700 }}>Restaurando Vidas</div>
@@ -95,7 +95,7 @@ export default function LandingPage() {
         borderBottom: '1px solid rgba(212,175,55,0.1)',
       }}>
         <img src="/restaurando-vidas/logo.jpeg" alt="Logo"
-          onError={(e) => { e.target.style.display = 'none'; }}
+          onError={(e) => { e.target.src = '/restaurando-vidas/logo.png'; }}
           style={{ width: 140, marginBottom: 32 }} />
         <h1 style={{ fontFamily: 'Cinzel, serif', fontSize: 48, color: '#D4AF37', marginBottom: 16, lineHeight: 1.2 }}>
           Restaurando Vidas
