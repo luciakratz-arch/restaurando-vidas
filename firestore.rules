@@ -1,11 +1,8 @@
 // firestore.rules
-// Cole estas regras no Console Firebase > Firestore > Rules
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Função auxiliar: verifica role do usuário autenticado
     function getUser() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
@@ -30,7 +27,7 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow create: if isGestora();
       allow update: if isGestora() || request.auth.uid == uid;
-      allow delete: if false; // nunca deletar usuários
+      allow delete: if false;
     }
 
     // ── Pacientes ──────────────────────────────────────────
@@ -44,9 +41,7 @@ service cloud.firestore {
     // ── Interconsultas ─────────────────────────────────────
     match /interconsultas/{id} {
       allow read: if isAuthenticated();
-      // Aluno cria a solicitação
       allow create: if isAluno();
-      // Gestora aprova ou rejeita
       allow update: if isGestora() ||
                        (isAluno() && resource.data.alunoId == request.auth.uid && resource.data.status == 'pendente');
       allow delete: if isGestora();
@@ -54,16 +49,55 @@ service cloud.firestore {
 
     // ── Relatórios ─────────────────────────────────────────
     match /relatorios/{id} {
-      // Gestora vê todos; aluno/profissional vê apenas aprovados ou os seus
       allow read: if isGestora() ||
                      (isAluno() && resource.data.alunoId == request.auth.uid) ||
                      (isProfissional() && resource.data.status == 'aprovado') ||
                      (isPastor() && resource.data.status == 'aprovado');
-      // Aluno cria
       allow create: if isAluno();
-      // Gestora edita (adiciona obs, aprova); aluno edita rascunho próprio
       allow update: if isGestora() ||
                        (isAluno() && resource.data.alunoId == request.auth.uid && resource.data.status != 'aprovado');
+      allow delete: if isGestora();
+    }
+
+    // ── Projeto / Página Inicial ───────────────────────────
+    // Leitura pública (Landing Page); escrita só Gestora/Pastor
+    match /projeto/{docId} {
+      allow read: if true;
+      allow write: if isGestora() || isPastor();
+    }
+
+    // ── Participantes (Responsáveis Técnicos, Equipe) ──────
+    // Leitura pública (Landing Page); escrita só Gestora
+    match /participantes/{id} {
+      allow read: if true;
+      allow create: if isGestora();
+      allow update: if isGestora();
+      allow delete: if isGestora();
+    }
+
+    // ── Avaliações ─────────────────────────────────────────
+    // Aprovadas: leitura pública (Landing Page)
+    // Todas: leitura autenticada; aprovação só Gestora
+    match /avaliacoes/{id} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update: if isGestora();
+      allow delete: if isGestora();
+    }
+
+    // ── Solicitações de Cadastro ───────────────────────────
+    match /solicitacoes/{id} {
+      allow create: if true; // cadastro público
+      allow read: if isGestora() || isPastor();
+      allow update: if isGestora();
+      allow delete: if isGestora();
+    }
+
+    // ── Prontuários ────────────────────────────────────────
+    match /prontuarios/{id} {
+      allow read: if isAuthenticated();
+      allow create: if isAluno() || isProfissional();
+      allow update: if isGestora() || isAluno() || isProfissional();
       allow delete: if isGestora();
     }
   }
