@@ -7,7 +7,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { useAuth } from '../contexts/AuthContext';
-import { gerarRelatorioRV } from '../utils/gerarPDF';
+import { gerarRelatorioRV, gerarRelatorioProjeto } from '../utils/gerarPDF';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -89,7 +89,7 @@ export default function RelatoriosPage() {
   };
 
   const handleDownloadPDF = (r) => {
-    gerarRelatorioRV(r);
+    gerarRelatorioRV(r).catch(console.error);
   };
 
   const statusMap = {

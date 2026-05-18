@@ -208,7 +208,7 @@ export default function MeusRelatoriosPage() {
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                   <span className={`badge ${st.cls}`}>{st.text}</span>
                   {r.status === 'aprovado' && (
-                    <button className="btn btn-outline btn-sm" onClick={() => gerarRelatorioRV(r)}>
+                    <button className="btn btn-outline btn-sm" onClick={() => gerarRelatorioRV(r).catch(console.error)}>
                       ↓ PDF
                     </button>
                   )}

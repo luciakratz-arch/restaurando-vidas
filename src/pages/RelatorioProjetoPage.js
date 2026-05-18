@@ -6,7 +6,7 @@ import { db } from '../services/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { format, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, startOfYear, endOfYear, subMonths, subQuarters, subYears } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import jsPDF from 'jspdf';
+// jsPDF movido para gerarPDF.js 'jspdf';
 import 'jspdf-autotable';
 
 const PERIODOS = [

@@ -4,182 +4,360 @@ import 'jspdf-autotable';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-const GOLD = [212, 175, 55];
-const DARK = [10, 10, 10];
-const GRAY = [40, 40, 40];
-const WHITE = [245, 240, 232];
+const GOLD = [180, 130, 20];
+const DARK = [30, 30, 30];
+const GRAY = [100, 100, 100];
+const LIGHT_GRAY = [240, 240, 240];
 
-export function gerarRelatorioRV(relatorio) {
+// Tenta carregar imagem como base64
+async function loadImageAsBase64(url) {
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
+
+export async function gerarRelatorioRV(relatorio) {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const W = doc.internal.pageSize.getWidth();
   const H = doc.internal.pageSize.getHeight();
 
-  // ─── Background ───────────────────────────────────────
-  doc.setFillColor(...DARK);
+  // ─── Fundo branco ─────────────────────────────────────
+  doc.setFillColor(255, 255, 255);
   doc.rect(0, 0, W, H, 'F');
 
-  // ─── Header bar ───────────────────────────────────────
-  doc.setFillColor(...GRAY);
-  doc.rect(0, 0, W, 40, 'F');
+  // ─── Cabeçalho colorido ────────────────────────────────
+  doc.setFillColor(20, 20, 20);
+  doc.rect(0, 0, W, 42, 'F');
 
-  // Gold accent line
+  // Linha dourada
   doc.setDrawColor(...GOLD);
-  doc.setLineWidth(0.8);
-  doc.line(0, 40, W, 40);
+  doc.setLineWidth(1);
+  doc.line(0, 42, W, 42);
 
-  // Logo text
+  // Tentar carregar logo
+  const logoUrl = window.location.origin + '/restaurando-vidas/logo.png';
+  const logoData = await loadImageAsBase64(logoUrl);
+  if (logoData) {
+    try { doc.addImage(logoData, 'PNG', 12, 6, 28, 28); } catch (e) {}
+  }
+
+  // Título no cabeçalho
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(18);
+  doc.setFontSize(16);
   doc.setTextColor(...GOLD);
-  doc.text('RESTAURANDO VIDAS', 15, 16);
+  doc.text('RESTAURANDO VIDAS', logoData ? 46 : 15, 18);
 
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor(...WHITE);
-  doc.text('Cuidado da Alma · Apoio Psicológico Gratuito', 15, 24);
+  doc.setTextColor(200, 200, 200);
+  doc.text('Cuidado da Alma · Apoio Psicológico Gratuito', logoData ? 46 : 15, 26);
 
-  // Tipo do documento
+  // Tipo e data no lado direito
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
   doc.setTextColor(...GOLD);
   doc.text('RELATÓRIO CLÍNICO', W - 15, 16, { align: 'right' });
-
-  // Número e data
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
-  doc.setTextColor(150, 150, 150);
+  doc.setTextColor(180, 180, 180);
   const now = format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
   doc.text(`Gerado em ${now}`, W - 15, 24, { align: 'right' });
-  doc.text(`Documento nº ${relatorio.id?.slice(-8).toUpperCase() || '--------'}`, W - 15, 30, { align: 'right' });
+  doc.text(`Doc nº ${relatorio.id?.slice(-8).toUpperCase() || '--------'}`, W - 15, 31, { align: 'right' });
 
-  // ─── Status ribbon ────────────────────────────────────
+  // ─── Status ──────────────────────────────────────────
   const statusColors = {
-    aprovado: [76, 175, 80],
-    pendente_revisao: [255, 152, 0],
-    rascunho: [100, 100, 100],
+    aprovado: [34, 139, 34],
+    pendente_revisao: [200, 120, 0],
+    rascunho: [120, 120, 120],
   };
   const sc = statusColors[relatorio.status] || GOLD;
   doc.setFillColor(...sc);
-  doc.roundedRect(15, 47, 50, 10, 3, 3, 'F');
+  doc.roundedRect(15, 48, 55, 9, 2, 2, 'F');
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(7.5);
+  doc.setTextColor(255, 255, 255);
   const statusTexts = {
     aprovado: 'APROVADO PELA GESTORA',
     pendente_revisao: 'AGUARDANDO REVISÃO',
     rascunho: 'RASCUNHO',
   };
-  doc.text(statusTexts[relatorio.status] || relatorio.status?.toUpperCase() || 'RELATÓRIO', 40, 53.5, { align: 'center' });
+  doc.text(statusTexts[relatorio.status] || 'RELATÓRIO', 42.5, 53.5, { align: 'center' });
 
-  // ─── Dados do Paciente ────────────────────────────────
-  let y = 68;
+  // ─── Conteúdo (texto escuro em fundo branco) ──────────
+  let y = 66;
 
   const sectionTitle = (title, yPos) => {
-    doc.setFillColor(...GRAY);
-    doc.rect(15, yPos - 5, W - 30, 12, 'F');
+    doc.setFillColor(...LIGHT_GRAY);
+    doc.rect(15, yPos - 4, W - 30, 10, 'F');
     doc.setDrawColor(...GOLD);
     doc.setLineWidth(2);
-    doc.line(15, yPos - 5, 15, yPos + 7);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.setTextColor(...GOLD);
-    doc.text(title, 21, yPos + 3);
+    doc.line(15, yPos - 4, 15, yPos + 6);
     doc.setLineWidth(0.3);
-    return yPos + 16;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9.5);
+    doc.setTextColor(...DARK);
+    doc.text(title, 21, yPos + 2.5);
+    return yPos + 14;
   };
 
-  const field = (label, value, yPos, labelW = 50) => {
+  const fieldRow = (label, value, yPos) => {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(8);
-    doc.setTextColor(150, 150, 150);
+    doc.setTextColor(...GRAY);
     doc.text(label.toUpperCase(), 15, yPos);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    doc.setTextColor(...WHITE);
-    doc.text(String(value || '—'), 15 + labelW, yPos);
+    doc.setTextColor(...DARK);
+    doc.text(String(value || '—'), 70, yPos);
     return yPos + 7;
   };
 
+  const textBlock = (label, value, yPos) => {
+    if (!value) return yPos;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...GRAY);
+    doc.text(label.toUpperCase(), 15, yPos);
+    yPos += 5;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...DARK);
+    const lines = doc.splitTextToSize(value, W - 30);
+    doc.text(lines, 15, yPos);
+    return yPos + lines.length * 5 + 4;
+  };
+
   y = sectionTitle('IDENTIFICAÇÃO DO PACIENTE', y);
-  y = field('Nome:', relatorio.pacienteNome, y);
-  y = field('Telefone:', relatorio.pacienteTelefone || '—', y);
-  y = field('Atendido por:', relatorio.alunoNome, y);
-  if (relatorio.profissionalNome) {
-    y = field('Prof. de Saúde:', relatorio.profissionalNome, y);
-  }
-  y = field('Período:', relatorio.periodo || '—', y);
-  y += 6;
+  y = fieldRow('Paciente:', relatorio.pacienteNome, y);
+  y = fieldRow('Telefone:', relatorio.pacienteTelefone, y);
+  y = fieldRow('Estagiário:', relatorio.alunoNome, y);
+  if (relatorio.profissionalNome) y = fieldRow('Prof. de Saúde:', relatorio.profissionalNome, y);
+  y = fieldRow('Período:', relatorio.periodo, y);
+  y += 4;
 
   y = sectionTitle('EVOLUÇÃO CLÍNICA', y);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(...WHITE);
-  const evolucaoLines = doc.splitTextToSize(relatorio.evolucao || '—', W - 30);
-  doc.text(evolucaoLines, 15, y);
-  y += evolucaoLines.length * 5 + 8;
+  y = textBlock('', relatorio.evolucao || '—', y);
+  y += 2;
 
   y = sectionTitle('INTERVENÇÕES REALIZADAS', y);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(...WHITE);
-  const interLines = doc.splitTextToSize(relatorio.intervencoes || '—', W - 30);
-  doc.text(interLines, 15, y);
-  y += interLines.length * 5 + 8;
+  y = textBlock('', relatorio.intervencoes || '—', y);
+  y += 2;
 
-  // Observações da Gestora (destaque)
+  // Observações da Gestora — box dourado
   if (relatorio.observacoesGestora) {
-    doc.setFillColor(212, 175, 55, 0.1);
-    doc.setFillColor(40, 35, 10);
-    const obsLines = doc.splitTextToSize(relatorio.observacoesGestora, W - 46);
-    doc.roundedRect(15, y - 4, W - 30, obsLines.length * 5 + 16, 3, 3, 'F');
+    doc.setFillColor(255, 248, 220);
     doc.setDrawColor(...GOLD);
     doc.setLineWidth(0.5);
-    doc.roundedRect(15, y - 4, W - 30, obsLines.length * 5 + 16, 3, 3, 'S');
+    const obsLines = doc.splitTextToSize(relatorio.observacoesGestora, W - 46);
+    const boxH = obsLines.length * 5 + 16;
+    doc.roundedRect(15, y, W - 30, boxH, 3, 3, 'FD');
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
+    doc.setFontSize(8.5);
     doc.setTextColor(...GOLD);
-    doc.text('OBSERVAÇÕES DA GESTORA (Lúcia Kratz · CRP 09/20590)', 22, y + 4);
+    doc.text('OBSERVAÇÕES DA SUPERVISORA TÉCNICA', 22, y + 7);
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...WHITE);
-    doc.text(obsLines, 22, y + 11);
-    y += obsLines.length * 5 + 24;
+    doc.setFontSize(9);
+    doc.setTextColor(...DARK);
+    doc.text(obsLines, 22, y + 13);
+    y += boxH + 8;
   }
 
-  // ─── Assinatura ───────────────────────────────────────
-  y = Math.max(y, H - 55);
-  doc.setDrawColor(...GOLD);
+  // ─── Assinaturas ──────────────────────────────────────
+  y = Math.max(y + 10, H - 65);
+
+  doc.setDrawColor(...LIGHT_GRAY);
   doc.setLineWidth(0.3);
-  doc.line(15, y, 85, y);
+  doc.line(15, y - 2, W - 15, y - 2);
+
+  // Assinatura 1 — Estagiário
+  const col1x = 15;
+  const col2x = W / 2 + 5;
+  const sigW = W / 2 - 25;
+
+  // Tentar carregar assinatura1
+  const sig1Url = window.location.origin + '/restaurando-vidas/assinatura1.png';
+  const sig1Data = await loadImageAsBase64(sig1Url);
+
+  doc.setDrawColor(...GRAY);
+  doc.setLineWidth(0.5);
+  doc.line(col1x, y + 20, col1x + sigW, y + 20);
+
+  if (sig1Data) {
+    try { doc.addImage(sig1Data, 'PNG', col1x, y, sigW, 18); } catch (e) {}
+  }
+
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
-  doc.setTextColor(...GOLD);
-  doc.text(relatorio.alunoNome || 'Estagiário', 50, y + 5, { align: 'center' });
+  doc.setTextColor(...DARK);
+  doc.text(relatorio.alunoNome || 'Estagiário', col1x + sigW / 2, y + 25, { align: 'center' });
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
-  doc.setTextColor(150, 150, 150);
-  doc.text('Estagiário de Psicologia', 50, y + 10, { align: 'center' });
+  doc.setTextColor(...GRAY);
+  doc.text('Estagiário de Psicologia', col1x + sigW / 2, y + 30, { align: 'center' });
 
-  if (relatorio.status === 'aprovado') {
-    doc.line(W - 85, y, W - 15, y);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.setTextColor(...GOLD);
-    doc.text('Lúcia Kratz', W - 50, y + 5, { align: 'center' });
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.setTextColor(150, 150, 150);
-    doc.text('Gestora Clínica · CRP 09/20590', W - 50, y + 10, { align: 'center' });
+  // Assinatura 2 — Gestora/Supervisora
+  const sig2Url = window.location.origin + '/restaurando-vidas/assinatura2.png';
+  const sig2Data = await loadImageAsBase64(sig2Url);
+
+  doc.setDrawColor(...GRAY);
+  doc.line(col2x, y + 20, col2x + sigW, y + 20);
+
+  if (sig2Data) {
+    try { doc.addImage(sig2Data, 'PNG', col2x, y, sigW, 18); } catch (e) {}
   }
 
-  // ─── Footer ───────────────────────────────────────────
-  doc.setFillColor(...GRAY);
-  doc.rect(0, H - 14, W, 14, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(...DARK);
+  doc.text('Lúcia Kratz', col2x + sigW / 2, y + 25, { align: 'center' });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(...GRAY);
+  doc.text('Supervisora Técnica · CRP 09/20590', col2x + sigW / 2, y + 30, { align: 'center' });
+
+  // ─── Rodapé ───────────────────────────────────────────
+  doc.setFillColor(245, 245, 245);
+  doc.rect(0, H - 12, W, 12, 'F');
+  doc.setDrawColor(...LIGHT_GRAY);
+  doc.line(0, H - 12, W, H - 12);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
-  doc.setTextColor(100, 100, 100);
+  doc.setTextColor(...GRAY);
   doc.text('Restaurando Vidas · Cuidado da Alma · Apoio Psicológico Gratuito', W / 2, H - 7, { align: 'center' });
   doc.text('Documento confidencial. Uso restrito aos profissionais autorizados.', W / 2, H - 3, { align: 'center' });
 
   const filename = `relatorio_${(relatorio.pacienteNome || 'paciente').replace(/\s+/g, '_')}_${format(new Date(), 'ddMMyyyy')}.pdf`;
   doc.save(filename);
+}
+
+// PDF do Relatório do Projeto
+export async function gerarRelatorioProjeto(rel) {
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+
+  doc.setFillColor(255, 255, 255);
+  doc.rect(0, 0, W, H, 'F');
+
+  // Cabeçalho
+  doc.setFillColor(20, 20, 20);
+  doc.rect(0, 0, W, 48, 'F');
+  doc.setDrawColor(...GOLD);
+  doc.setLineWidth(1);
+  doc.line(0, 48, W, 48);
+
+  const logoUrl = window.location.origin + '/restaurando-vidas/logo.png';
+  const logoData = await loadImageAsBase64(logoUrl);
+  if (logoData) {
+    try { doc.addImage(logoData, 'PNG', 12, 6, 30, 30); } catch (e) {}
+  }
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.setTextColor(...GOLD);
+  doc.text('RESTAURANDO VIDAS', logoData ? 48 : 15, 20);
+
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(200, 200, 200);
+  doc.text(`Relatório ${rel.periodo?.charAt(0).toUpperCase() + rel.periodo?.slice(1)} — ${rel.periodoLabel}`, logoData ? 48 : 15, 29);
+  doc.text(`Gerado em: ${format(new Date(rel.geradoEm), 'dd/MM/yyyy HH:mm')}`, logoData ? 48 : 15, 37);
+
+  let y = 62;
+
+  const section = (title, yPos) => {
+    doc.setFillColor(...LIGHT_GRAY);
+    doc.rect(15, yPos - 4, W - 30, 10, 'F');
+    doc.setDrawColor(...GOLD);
+    doc.setLineWidth(2);
+    doc.line(15, yPos - 4, 15, yPos + 6);
+    doc.setLineWidth(0.3);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(...DARK);
+    doc.text(title, 21, yPos + 2.5);
+    return yPos + 14;
+  };
+
+  const row = (label, value, yPos) => {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...DARK);
+    doc.text(label, 20, yPos);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...GOLD);
+    doc.text(String(value), W - 20, yPos, { align: 'right' });
+    doc.setDrawColor(...LIGHT_GRAY);
+    doc.setLineWidth(0.2);
+    doc.line(20, yPos + 2, W - 20, yPos + 2);
+    return yPos + 10;
+  };
+
+  y = section('PACIENTES', y);
+  y = row('Total de Pacientes Cadastrados', rel.totalPacientes, y);
+  y = row('Pacientes em Atendimento Ativo', rel.pacientesAtivos, y);
+  y = row('Pacientes com Alta', rel.pacientesAlta, y);
+  y += 6;
+
+  y = section('ATENDIMENTOS', y);
+  y = row('Total de Sessões Registradas', rel.totalSessoes, y);
+  y = row('Interconsultas Realizadas', rel.totalInterconsultas, y);
+  y = row('Interconsultas Aprovadas', rel.interconsultasAprovadas, y);
+  y += 6;
+
+  if (rel.observacoes) {
+    y = section('OBSERVAÇÕES DA GESTORA', y);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...DARK);
+    const lines = doc.splitTextToSize(rel.observacoes, W - 40);
+    doc.text(lines, 20, y);
+    y += lines.length * 6 + 8;
+  }
+
+  // Assinatura
+  y = Math.max(y + 10, H - 55);
+
+  const sig2Url = window.location.origin + '/restaurando-vidas/assinatura2.png';
+  const sig2Data = await loadImageAsBase64(sig2Url);
+  const sigW = 70;
+  const sigX = W / 2 - sigW / 2;
+
+  if (sig2Data) {
+    try { doc.addImage(sig2Data, 'PNG', sigX, y, sigW, 18); } catch (e) {}
+  }
+
+  doc.setDrawColor(...GRAY);
+  doc.setLineWidth(0.5);
+  doc.line(sigX, y + 20, sigX + sigW, y + 20);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(...DARK);
+  doc.text('Lúcia Kratz', W / 2, y + 26, { align: 'center' });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(...GRAY);
+  doc.text('Responsável Técnica · CRP 09/20590', W / 2, y + 31, { align: 'center' });
+  doc.text('Doutora em Psicologia · Goiânia, GO', W / 2, y + 36, { align: 'center' });
+
+  // Rodapé
+  doc.setFillColor(245, 245, 245);
+  doc.rect(0, H - 12, W, 12, 'F');
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(...GRAY);
+  doc.text('Restaurando Vidas · Cuidado da Alma · Apoio Psicológico Gratuito', W / 2, H - 7, { align: 'center' });
+  doc.text('Documento oficial. Goiânia, GO.', W / 2, H - 3, { align: 'center' });
+
+  doc.save(`relatorio_projeto_${rel.periodo}_${rel.periodoLabel?.replace(/\//g, '-') || ''}.pdf`);
 }
