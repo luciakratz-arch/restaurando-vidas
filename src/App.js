@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import './index.css';
 
 import LandingPage from './pages/LandingPage';
+import ConhecaPage from './pages/ConhecaPage';
 import CadastroPage from './pages/CadastroPage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
@@ -28,6 +29,7 @@ export default function App() {
         <Routes>
           {/* Páginas PÚBLICAS — sem login */}
           <Route path="/" element={<LandingPage />} />
+          <Route path="/conheca" element={<ConhecaPage />} />
           <Route path="/cadastro" element={<CadastroPage />} />
           <Route path="/login" element={<LoginPage />} />
 
