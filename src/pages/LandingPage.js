@@ -23,33 +23,24 @@ export default function LandingPage() {
 
   useEffect(() => {
     async function carregar() {
-      // Dados da página inicial
       try {
         const snapPagina = await getDoc(doc(db, 'projeto', 'pagina_inicial'));
         if (snapPagina.exists()) setDados(snapPagina.data());
-      } catch (e) {
-        console.error('Erro projeto:', e);
-      }
+      } catch (e) { console.error('Erro projeto:', e); }
 
-      // Participantes ativos (sem filtro de tipo — campo não existe nos docs)
       try {
         const qP = query(collection(db, 'participantes'), where('ativo', '==', true));
         const snapP = await getDocs(qP);
         setParticipantes(snapP.docs.map(d => ({ id: d.id, ...d.data() })));
-      } catch (e) {
-        console.error('Erro participantes:', e);
-      }
+      } catch (e) { console.error('Erro participantes:', e); }
 
-      // Avaliações aprovadas (sem orderBy para evitar índice composto)
       try {
         const qA = query(collection(db, 'avaliacoes'), where('aprovada', '==', true));
         const snapA = await getDocs(qA);
         const lista = snapA.docs.map(d => ({ id: d.id, ...d.data() }));
         lista.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
         setAvaliacoes(lista);
-      } catch (e) {
-        console.error('Erro avaliações:', e);
-      }
+      } catch (e) { console.error('Erro avaliações:', e); }
 
       setCarregando(false);
     }
@@ -67,8 +58,8 @@ export default function LandingPage() {
         position: 'sticky', top: 0, zIndex: 100,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <img src="/restaurando-vidas/logo.jpeg" alt="Logo"
-            onError={(e) => { e.target.src = '/restaurando-vidas/logo.png'; }}
+          <img src="/restaurando-vidas/logo.png" alt="Logo"
+            onError={(e) => { e.target.style.display = 'none'; }}
             style={{ height: 48 }} />
           <div>
             <div style={{ fontFamily: 'Cinzel, serif', fontSize: 18, color: '#D4AF37', fontWeight: 700 }}>Restaurando Vidas</div>
@@ -94,8 +85,8 @@ export default function LandingPage() {
         background: 'radial-gradient(circle at 50% 50%, rgba(212,175,55,0.08) 0%, transparent 70%)',
         borderBottom: '1px solid rgba(212,175,55,0.1)',
       }}>
-        <img src="/restaurando-vidas/logo.jpeg" alt="Logo"
-          onError={(e) => { e.target.src = '/restaurando-vidas/logo.png'; }}
+        <img src="/restaurando-vidas/logo.png" alt="Logo"
+          onError={(e) => { e.target.style.display = 'none'; }}
           style={{ width: 140, marginBottom: 32 }} />
         <h1 style={{ fontFamily: 'Cinzel, serif', fontSize: 48, color: '#D4AF37', marginBottom: 16, lineHeight: 1.2 }}>
           Restaurando Vidas
