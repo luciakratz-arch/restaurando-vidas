@@ -1,8 +1,6 @@
 // src/pages/ConhecaPage.js
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db } from '../services/firebase';
 
 function Estrelas({ n }) {
   return (
@@ -14,38 +12,26 @@ function Estrelas({ n }) {
   );
 }
 
+const HISTORIA = `O Projeto Restaurando Vidas nasceu na cidade de São Paulo, sob a liderança de Max, como um braço missionário da iniciativa "Papo com Deus". O projeto surge da identificação de uma urgência latente: o cuidado integral com a saúde emocional e espiritual das pessoas. Unindo a fé e a ciência, a iniciativa estruturou uma rede de apoio especializada que conta com a atuação dedicada de psicólogos, psiquiatras e estagiários de psicologia. Nosso propósito é acolher o sofrimento humano com excelência técnica, ética e amor cristão, oferecendo suporte psicológico a quem mais precisa e restaurando a dignidade e a esperança de cada indivíduo assistido.`;
+
+const MISSAO = `Missão: Promover a restauração integral de vidas por meio do cuidado em saúde mental e espiritual, integrando profissionais da saúde e a comunidade cristã. Visão: Ser referência em acolhimento psicossocial e espiritual ONLINE, expandindo a rede de profissionais e estagiários para alcançar e transformar cada vez mais realidades.`;
+
+const TIMELINE = [
+  { ano: '2000', titulo: 'SSS', descricao: 'XXX' },
+  { ano: '2026', titulo: 'Início do projeto - Restaurando Vidas', descricao: 'Unindo esforços com profissionais da saúde para atender as dores emocionais da comunidade atendida.' },
+];
+
+const PARTICIPANTES = [
+  {
+    nome: 'lucia kratz',
+    cargo: 'Psicloga Responsável',
+    especializacao: 'Doutora em Psicologia, Esp. em TCC e Musicoterapia',
+    curriculo: `Doutora em Psicologia pela PUC-GO e Mestre em Administração pelo CENEC-FACECA/MG, com graduação em Administração de Empresas pela PUC-GO, Psicologia pela UNVIERSO-Go e Bacharelado em Música Canto pela UNIS-MG. Coaching Sênior pelo ICI/SP. Com mais de 25 anos de experiência como musicista e professora de graduação e pós-graduação, atuou como Superintendente de Ensino da Fundação Antares, Coordenadora dos cursos de Administração e Marketing da Faculdade Ipog, Professora na UFES e Avaliadora do INEP nos Cursos Superiores de Tecnologia. Também exerceu funções como Gestora da Qualidade na FacUnicamps e Gestora/Membro parcial da CPA da IES. Com vasta experiência em gestão, tem ênfase em Gestão Educacional, Coaching, Administração de Pessoas, Gestão de Processos, Planejamento Estratégico e Vendas. Atua principalmente com temas como psicologia clínica, neurofeedback, gestão empresarial, administração, planejamento estratégico.`,
+  },
+];
+
 export default function ConhecaPage() {
   const navigate = useNavigate();
-  const [avaliacoes, setAvaliacoes] = useState([]);
-  const [dados, setDados] = useState({ historia: '', missao: '', timeline: [] });
-  const [participantes, setParticipantes] = useState([]);
-  const [carregando, setCarregando] = useState(true);
-
-  useEffect(() => {
-    async function carregar() {
-      try {
-        const snapPagina = await getDoc(doc(db, 'projeto', 'pagina_inicial'));
-        if (snapPagina.exists()) setDados(snapPagina.data());
-      } catch (e) { console.error('Erro projeto:', e); }
-
-      try {
-        const qP = query(collection(db, 'participantes'), where('ativo', '==', true));
-        const snapP = await getDocs(qP);
-        setParticipantes(snapP.docs.map(d => ({ id: d.id, ...d.data() })));
-      } catch (e) { console.error('Erro participantes:', e); }
-
-      try {
-        const qA = query(collection(db, 'avaliacoes'), where('aprovada', '==', true));
-        const snapA = await getDocs(qA);
-        const lista = snapA.docs.map(d => ({ id: d.id, ...d.data() }));
-        lista.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-        setAvaliacoes(lista);
-      } catch (e) { console.error('Erro avaliações:', e); }
-
-      setCarregando(false);
-    }
-    carregar();
-  }, []);
 
   return (
     <div style={{ minHeight: '100vh', background: '#0A0A0A', color: '#F5F0E8', fontFamily: 'Raleway, sans-serif' }}>
@@ -92,96 +78,55 @@ export default function ConhecaPage() {
         </p>
       </section>
 
-      {/* Carregando */}
-      {carregando && (
-        <section style={{ padding: '80px 40px', textAlign: 'center' }}>
-          <div style={{ color: '#D4AF37', fontSize: 16 }}>Carregando informações...</div>
-        </section>
-      )}
-
       {/* História e Missão */}
-      {!carregando && (dados.historia || dados.missao) && (
-        <section style={{ padding: '80px 40px', maxWidth: 1100, margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 40 }}>
-            {dados.historia && (
-              <div style={{ background: '#111', borderRadius: 16, padding: 32, border: '1px solid rgba(212,175,55,0.2)' }}>
-                <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 22, color: '#D4AF37', marginBottom: 20 }}>
-                  ✦ Nossa História
-                </h2>
-                <p style={{ color: '#9A9080', lineHeight: 1.9, fontSize: 15 }}>{dados.historia}</p>
-              </div>
-            )}
-            {dados.missao && (
-              <div style={{ background: '#111', borderRadius: 16, padding: 32, border: '1px solid rgba(212,175,55,0.2)' }}>
-                <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 22, color: '#D4AF37', marginBottom: 20 }}>
-                  ✦ Missão e Visão
-                </h2>
-                <p style={{ color: '#9A9080', lineHeight: 1.9, fontSize: 15 }}>{dados.missao}</p>
-              </div>
-            )}
+      <section style={{ padding: '80px 40px', maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 40 }}>
+          <div style={{ background: '#111', borderRadius: 16, padding: 32, border: '1px solid rgba(212,175,55,0.2)' }}>
+            <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 22, color: '#D4AF37', marginBottom: 20 }}>✦ Nossa História</h2>
+            <p style={{ color: '#9A9080', lineHeight: 1.9, fontSize: 15 }}>{HISTORIA}</p>
           </div>
-        </section>
-      )}
+          <div style={{ background: '#111', borderRadius: 16, padding: 32, border: '1px solid rgba(212,175,55,0.2)' }}>
+            <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 22, color: '#D4AF37', marginBottom: 20 }}>✦ Missão e Visão</h2>
+            <p style={{ color: '#9A9080', lineHeight: 1.9, fontSize: 15 }}>{MISSAO}</p>
+          </div>
+        </div>
+      </section>
 
       {/* Linha do Tempo */}
-      {!carregando && dados.timeline?.length > 0 && (
-        <section style={{ padding: '60px 40px', background: '#0f0f0f', borderTop: '1px solid rgba(212,175,55,0.1)', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>
-          <div style={{ maxWidth: 800, margin: '0 auto' }}>
-            <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 24, color: '#D4AF37', marginBottom: 40, textAlign: 'center' }}>
-              ✦ Conquistas e Marcos
-            </h2>
-            <div style={{ position: 'relative', paddingLeft: 40 }}>
-              <div style={{ position: 'absolute', left: 16, top: 0, bottom: 0, width: 2, background: 'rgba(212,175,55,0.3)' }} />
-              {dados.timeline.map((m, i) => (
-                <div key={i} style={{ position: 'relative', marginBottom: 32 }}>
-                  <div style={{ position: 'absolute', left: -30, top: 4, width: 14, height: 14, borderRadius: '50%', background: '#D4AF37' }} />
-                  <div style={{ fontWeight: 700, color: '#D4AF37', fontSize: 15 }}>{m.ano} — {m.titulo}</div>
-                  {m.descricao && <div style={{ fontSize: 14, color: '#9A9080', marginTop: 4 }}>{m.descricao}</div>}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Responsáveis Técnicos */}
-      {!carregando && participantes.length > 0 && (
-        <section style={{ padding: '80px 40px', maxWidth: 1100, margin: '0 auto' }}>
+      <section style={{ padding: '60px 40px', background: '#0f0f0f', borderTop: '1px solid rgba(212,175,55,0.1)', borderBottom: '1px solid rgba(212,175,55,0.1)' }}>
+        <div style={{ maxWidth: 800, margin: '0 auto' }}>
           <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 24, color: '#D4AF37', marginBottom: 40, textAlign: 'center' }}>
-            ✦ Responsáveis Técnicos
+            ✦ Conquistas e Marcos
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 24 }}>
-            {participantes.map(p => (
-              <div key={p.id} style={{ background: '#111', border: '1px solid #D4AF37', borderRadius: 16, padding: 28 }}>
-                <div style={{ fontFamily: 'Cinzel, serif', fontSize: 18, color: '#D4AF37', marginBottom: 6 }}>{p.nome}</div>
-                <div style={{ fontSize: 13, color: '#9A9080', marginBottom: 8 }}>{p.cargo}</div>
-                {p.especializacao && <div style={{ fontSize: 13, color: '#F0D060', fontStyle: 'italic', marginBottom: 12 }}>{p.especializacao}</div>}
-                {p.curriculo && <p style={{ fontSize: 13, color: '#9A9080', lineHeight: 1.7 }}>{p.curriculo}</p>}
+          <div style={{ position: 'relative', paddingLeft: 40 }}>
+            <div style={{ position: 'absolute', left: 16, top: 0, bottom: 0, width: 2, background: 'rgba(212,175,55,0.3)' }} />
+            {TIMELINE.map((m, i) => (
+              <div key={i} style={{ position: 'relative', marginBottom: 32 }}>
+                <div style={{ position: 'absolute', left: -30, top: 4, width: 14, height: 14, borderRadius: '50%', background: '#D4AF37' }} />
+                <div style={{ fontWeight: 700, color: '#D4AF37', fontSize: 15 }}>{m.ano} — {m.titulo}</div>
+                {m.descricao && <div style={{ fontSize: 14, color: '#9A9080', marginTop: 4 }}>{m.descricao}</div>}
               </div>
             ))}
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
-      {/* Avaliações */}
-      {!carregando && avaliacoes.length > 0 && (
-        <section style={{ padding: '80px 40px', background: '#0f0f0f', borderTop: '1px solid rgba(212,175,55,0.1)' }}>
-          <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-            <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 24, color: '#D4AF37', marginBottom: 40, textAlign: 'center' }}>
-              ✦ Impacto nas Vidas
-            </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
-              {avaliacoes.map(a => (
-                <div key={a.id} style={{ background: '#161616', border: '1px solid rgba(212,175,55,0.2)', borderRadius: 12, padding: 24 }}>
-                  <Estrelas n={a.estrelas} />
-                  <p style={{ color: '#9A9080', fontSize: 14, lineHeight: 1.7, margin: '12px 0' }}>"{a.comentario}"</p>
-                  <div style={{ fontSize: 12, color: '#5A5048' }}>{a.periodo || a.pacienteNome}</div>
-                </div>
-              ))}
+      {/* Responsáveis Técnicos */}
+      <section style={{ padding: '80px 40px', maxWidth: 1100, margin: '0 auto' }}>
+        <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 24, color: '#D4AF37', marginBottom: 40, textAlign: 'center' }}>
+          ✦ Responsáveis Técnicos
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 24 }}>
+          {PARTICIPANTES.map((p, i) => (
+            <div key={i} style={{ background: '#111', border: '1px solid #D4AF37', borderRadius: 16, padding: 28 }}>
+              <div style={{ fontFamily: 'Cinzel, serif', fontSize: 18, color: '#D4AF37', marginBottom: 6 }}>{p.nome}</div>
+              <div style={{ fontSize: 13, color: '#9A9080', marginBottom: 8 }}>{p.cargo}</div>
+              {p.especializacao && <div style={{ fontSize: 13, color: '#F0D060', fontStyle: 'italic', marginBottom: 12 }}>{p.especializacao}</div>}
+              {p.curriculo && <p style={{ fontSize: 13, color: '#9A9080', lineHeight: 1.7 }}>{p.curriculo}</p>}
             </div>
-          </div>
-        </section>
-      )}
+          ))}
+        </div>
+      </section>
 
       {/* CTA */}
       <section style={{
