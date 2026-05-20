@@ -6,9 +6,9 @@ import ProtectedRoute from './components/ProtectedRoute';
 import './index.css';
 
 import LandingPage from './pages/LandingPage';
-import ConhecaPage from './pages/ConhecaPage';
 import CadastroPage from './pages/CadastroPage';
 import LoginPage from './pages/LoginPage';
+import IndicarPublicoPage from './pages/IndicarPublicoPage';
 import DashboardPage from './pages/DashboardPage';
 import IndicarPacientePage from './pages/IndicarPacientePage';
 import InterconsultasPage from './pages/InterconsultasPage';
@@ -29,9 +29,9 @@ export default function App() {
         <Routes>
           {/* Páginas PÚBLICAS — sem login */}
           <Route path="/" element={<LandingPage />} />
-          <Route path="/conheca" element={<ConhecaPage />} />
           <Route path="/cadastro" element={<CadastroPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/indicar-paciente" element={<IndicarPublicoPage />} />
 
           {/* Gestora + Pastor */}
           <Route path="/dashboard" element={
