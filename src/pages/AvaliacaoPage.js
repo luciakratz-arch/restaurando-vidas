@@ -3,41 +3,30 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import {
   collection, query, onSnapshot, orderBy, doc,
-  addDoc, updateDoc, serverTimestamp, getDocs, where
+  updateDoc, serverTimestamp, getDocs
 } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-function Estrelas({ valor, onChange }) {
-  const [hover, setHover] = useState(0);
+function Estrelas({ valor }) {
   return (
     <div style={{ display: 'flex', gap: 4 }}>
       {[1,2,3,4,5].map(i => (
-        <span key={i}
-          onClick={() => onChange && onChange(i)}
-          onMouseEnter={() => onChange && setHover(i)}
-          onMouseLeave={() => onChange && setHover(0)}
-          style={{
-            fontSize: 32, cursor: onChange ? 'pointer' : 'default',
-            color: i <= (hover || valor) ? 'var(--gold)' : 'var(--text-muted)',
-            transition: 'color 0.15s',
-          }}>★</span>
+        <span key={i} style={{ fontSize: 24, color: i <= valor ? 'var(--gold)' : 'var(--text-muted)' }}>★</span>
       ))}
     </div>
   );
 }
 
+const BASE_URL = 'https://luciakratz-arch.github.io/restaurando-vidas/#/avaliacao';
+
 export default function AvaliacaoPage() {
-  const { isGestora, isPastor, currentUser, userProfile } = useAuth();
-  const canEdit = isGestora || isPastor;
+  const { isGestora } = useAuth();
   const [avaliacoes, setAvaliacoes] = useState([]);
   const [pacientes, setPacientes] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ pacienteId: '', estrelas: 0, comentario: '', periodo: '' });
-  const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState('');
+  const [linkCopiado, setLinkCopiado] = useState('');
 
   useEffect(() => {
     const unAv = onSnapshot(
@@ -50,28 +39,24 @@ export default function AvaliacaoPage() {
     return unAv;
   }, []);
 
-  const salvar = async (e) => {
-    e.preventDefault();
-    if (form.estrelas === 0) { alert('Selecione a avaliação em estrelas.'); return; }
-    setSaving(true);
-    try {
-      const paciente = pacientes.find(p => p.id === form.pacienteId);
-      await addDoc(collection(db, 'avaliacoes'), {
-        pacienteId: form.pacienteId,
-        pacienteNome: paciente?.nome || '—',
-        estrelas: form.estrelas,
-        comentario: form.comentario,
-        periodo: form.periodo,
-        aprovada: false,
-        criadoPor: currentUser.uid,
-        criadoPorNome: userProfile?.nome,
-        createdAt: serverTimestamp(),
-      });
-      setForm({ pacienteId: '', estrelas: 0, comentario: '', periodo: '' });
-      setShowForm(false);
-      setSuccess('Avaliação registrada! Aguarda aprovação da Gestora.');
-    } catch (err) { console.error(err); }
-    finally { setSaving(false); }
+  const gerarLink = (paciente) => {
+    // Codifica nome e id em base64 para URL limpa
+    const token = btoa(JSON.stringify({ id: paciente.id, nome: paciente.nome }));
+    return `${BASE_URL}/${token}`;
+  };
+
+  const copiarLink = (paciente) => {
+    const link = gerarLink(paciente);
+    navigator.clipboard.writeText(link).then(() => {
+      setLinkCopiado(paciente.id);
+      setTimeout(() => setLinkCopiado(''), 3000);
+    });
+  };
+
+  const compartilharWhatsApp = (paciente) => {
+    const link = gerarLink(paciente);
+    const msg = encodeURIComponent(`Olá ${paciente.nome}! Gostaríamos de saber como foi sua experiência com o Projeto Restaurando Vidas. Por favor, responda nossa avaliação: ${link}`);
+    window.open(`https://wa.me/?text=${msg}`, '_blank');
   };
 
   const aprovar = async (id) => {
@@ -90,83 +75,67 @@ export default function AvaliacaoPage() {
 
   return (
     <Layout>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
-        <div>
-          <h1>Avaliação de Pacientes</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Ficha colaborativa de acompanhamento</p>
-        </div>
-        {canEdit && (
-          <button className="btn btn-gold" onClick={() => setShowForm(!showForm)}>
-            {showForm ? '✕ Cancelar' : '+ Nova Avaliação'}
-          </button>
+      <div className="page-header">
+        <h1>Avaliações</h1>
+        <p>Envie links de avaliação para os pacientes e gerencie as respostas</p>
+      </div>
+
+      {/* Gerar links por paciente */}
+      <div className="card" style={{ marginBottom: 28 }}>
+        <h3 style={{ fontSize: 15, color: 'var(--gold)', marginBottom: 4 }}>✦ Enviar Link de Avaliação</h3>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>
+          Selecione um paciente e copie o link personalizado para enviar via WhatsApp ou e-mail.
+          O paciente responde sem precisar de login.
+        </p>
+
+        {pacientes.length === 0 ? (
+          <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Nenhum paciente cadastrado ainda.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {pacientes.map(p => (
+              <div key={p.id} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '12px 16px', background: 'var(--bg-secondary)',
+                borderRadius: 10, border: '1px solid var(--border)', flexWrap: 'wrap', gap: 8,
+              }}>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: 14 }}>{p.nome}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{p.telefone || '—'}</div>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button className="btn btn-outline btn-sm" onClick={() => copiarLink(p)}>
+                    {linkCopiado === p.id ? '✓ Link Copiado!' : '🔗 Copiar Link'}
+                  </button>
+                  <button className="btn btn-gold btn-sm" onClick={() => compartilharWhatsApp(p)}>
+                    📲 WhatsApp
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
-      {success && (
-        <div className="alert alert-success" style={{ marginBottom: 20 }}>
-          ✓ {success}
-          <button style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer' }}
-            onClick={() => setSuccess('')}>✕</button>
-        </div>
-      )}
-
-      {showForm && (
-        <div className="card" style={{ marginBottom: 24 }}>
-          <h3 style={{ fontSize: 15, marginBottom: 20 }}>Nova Avaliação</h3>
-          <form onSubmit={salvar}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <div className="form-group">
-                <label className="form-label">Paciente *</label>
-                <select className="form-control" value={form.pacienteId}
-                  onChange={(e) => setForm(p => ({ ...p, pacienteId: e.target.value }))} required>
-                  <option value="">Selecione...</option>
-                  {pacientes.map(p => <option key={p.id} value={p.id}>{p.nome}</option>)}
-                </select>
-              </div>
-              <div className="form-group">
-                <label className="form-label">Período de Referência</label>
-                <input className="form-control" value={form.periodo}
-                  onChange={(e) => setForm(p => ({ ...p, periodo: e.target.value }))}
-                  placeholder="Ex: Jan-Mar 2026" />
-              </div>
-            </div>
-            <div className="form-group">
-              <label className="form-label">Avaliação *</label>
-              <Estrelas valor={form.estrelas} onChange={(v) => setForm(p => ({ ...p, estrelas: v }))} />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Comentário</label>
-              <textarea className="form-control" rows={4} value={form.comentario}
-                onChange={(e) => setForm(p => ({ ...p, comentario: e.target.value }))}
-                placeholder="Descreva a evolução e impacto do atendimento..." />
-            </div>
-            <button type="submit" className="btn btn-gold" disabled={saving}>
-              {saving ? 'Salvando...' : '✓ Registrar Avaliação'}
-            </button>
-          </form>
-        </div>
-      )}
-
       {/* Pendentes — só Gestora vê */}
       {isGestora && pendentes.length > 0 && (
-        <div style={{ marginBottom: 32 }}>
-          <h3 style={{ fontSize: 15, marginBottom: 16, color: 'var(--warning)' }}>
+        <div style={{ marginBottom: 28 }}>
+          <h3 style={{ fontSize: 15, marginBottom: 16, color: '#EAB308' }}>
             ⚠ Aguardando Aprovação ({pendentes.length})
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {pendentes.map(a => (
-              <div key={a.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div key={a.id} className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <div>
-                  <div style={{ fontWeight: 600, marginBottom: 4 }}>{a.pacienteNome}</div>
+                  <div style={{ fontWeight: 600, marginBottom: 6 }}>{a.pacienteNome}</div>
                   <Estrelas valor={a.estrelas} />
-                  <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 8 }}>{a.comentario}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
-                    {a.criadoPorNome} · {fmtDate(a.createdAt)}
+                  {a.comentario && <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 8, maxWidth: 500 }}>"{a.comentario}"</div>}
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>
+                    Respondido em: {fmtDate(a.createdAt)}
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 8, flexShrink: 0, marginLeft: 16 }}>
+                <div style={{ display: 'flex', gap: 8 }}>
                   <button className="btn btn-gold btn-sm" onClick={() => aprovar(a.id)}>✓ Aprovar</button>
-                  <button className="btn btn-danger btn-sm" onClick={() => rejeitar(a.id)}>✕</button>
+                  <button className="btn btn-outline btn-sm" onClick={() => rejeitar(a.id)}>✕ Rejeitar</button>
                 </div>
               </div>
             ))}
@@ -189,14 +158,14 @@ export default function AvaliacaoPage() {
                 {a.periodo && <span className="badge badge-gold">{a.periodo}</span>}
               </div>
               <Estrelas valor={a.estrelas} />
-              <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7, margin: '12px 0' }}>
-                "{a.comentario}"
-              </p>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                {a.criadoPorNome} · {fmtDate(a.createdAt)}
-              </div>
+              {a.comentario && (
+                <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7, margin: '12px 0' }}>
+                  "{a.comentario}"
+                </p>
+              )}
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{fmtDate(a.createdAt)}</div>
               {isGestora && (
-                <button className="btn btn-danger btn-sm" style={{ marginTop: 12 }} onClick={() => rejeitar(a.id)}>
+                <button className="btn btn-outline btn-sm" style={{ marginTop: 12 }} onClick={() => rejeitar(a.id)}>
                   Remover da Página Inicial
                 </button>
               )}
