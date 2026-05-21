@@ -27,7 +27,7 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Páginas PÚBLICAS — sem login */}
+          {/* Públicas */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/cadastro" element={<CadastroPage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -35,80 +35,59 @@ export default function App() {
 
           {/* Gestora + Pastor */}
           <Route path="/dashboard" element={
-            <ProtectedRoute allowedRoles={['gestora', 'pastor']}>
-              <DashboardPage />
-            </ProtectedRoute>
+            <ProtectedRoute allowedRoles={['gestora','pastor']}><DashboardPage /></ProtectedRoute>
           } />
           <Route path="/pagina-inicial" element={
-            <ProtectedRoute allowedRoles={['gestora', 'pastor', 'aluno', 'profissional']}>
-              <PaginaInicialPage />
-            </ProtectedRoute>
+            <ProtectedRoute allowedRoles={['gestora','pastor','aluno','profissional']}><PaginaInicialPage /></ProtectedRoute>
           } />
           <Route path="/participantes" element={
-            <ProtectedRoute allowedRoles={['gestora', 'pastor', 'aluno', 'profissional']}>
-              <ParticipantesPage />
-            </ProtectedRoute>
+            <ProtectedRoute allowedRoles={['gestora','pastor','aluno','profissional']}><ParticipantesPage /></ProtectedRoute>
           } />
           <Route path="/avaliacoes" element={
-            <ProtectedRoute allowedRoles={['gestora', 'pastor']}>
-              <AvaliacaoPage />
-            </ProtectedRoute>
+            <ProtectedRoute allowedRoles={['gestora','pastor']}><AvaliacaoPage /></ProtectedRoute>
           } />
           <Route path="/relatorios-projeto" element={
-            <ProtectedRoute allowedRoles={['gestora', 'pastor']}>
-              <RelatorioProjetoPage />
-            </ProtectedRoute>
+            <ProtectedRoute allowedRoles={['gestora','pastor']}><RelatorioProjetoPage /></ProtectedRoute>
           } />
           <Route path="/indicar" element={
-            <ProtectedRoute allowedRoles={['gestora', 'pastor', 'profissional']}>
-              <IndicarPacientePage />
-            </ProtectedRoute>
+            <ProtectedRoute allowedRoles={['gestora','pastor','profissional']}><IndicarPacientePage /></ProtectedRoute>
           } />
 
-          {/* Gestora only */}
+          {/* Gestora */}
           <Route path="/interconsultas" element={
-            <ProtectedRoute allowedRoles={['gestora']}>
-              <InterconsultasPage />
-            </ProtectedRoute>
+            <ProtectedRoute allowedRoles={['gestora']}><InterconsultasPage /></ProtectedRoute>
           } />
           <Route path="/relatorios" element={
-            <ProtectedRoute allowedRoles={['gestora']}>
-              <RelatoriosPage />
-            </ProtectedRoute>
+            <ProtectedRoute allowedRoles={['gestora']}><RelatoriosPage /></ProtectedRoute>
           } />
           <Route path="/usuarios" element={
-            <ProtectedRoute allowedRoles={['gestora']}>
-              <UsuariosPage />
-            </ProtectedRoute>
+            <ProtectedRoute allowedRoles={['gestora']}><UsuariosPage /></ProtectedRoute>
           } />
+          {/* Prontuários — Gestora vê todos */}
           <Route path="/prontuarios" element={
-            <ProtectedRoute allowedRoles={['gestora', 'aluno', 'profissional']}>
-              <ProntuariosPage />
-            </ProtectedRoute>
+            <ProtectedRoute allowedRoles={['gestora']}><ProntuariosPage /></ProtectedRoute>
           } />
 
           {/* Aluno */}
           <Route path="/atendimentos" element={
-            <ProtectedRoute allowedRoles={['aluno']}>
-              <ProntuariosPage />
-            </ProtectedRoute>
+            <ProtectedRoute allowedRoles={['aluno']}><ProntuariosPage /></ProtectedRoute>
+          } />
+          <Route path="/prontuarios-aluno" element={
+            <ProtectedRoute allowedRoles={['aluno']}><ProntuariosPage /></ProtectedRoute>
           } />
           <Route path="/solicitar-especialista" element={
-            <ProtectedRoute allowedRoles={['aluno']}>
-              <SolicitarEspecialistaPage />
-            </ProtectedRoute>
+            <ProtectedRoute allowedRoles={['aluno']}><SolicitarEspecialistaPage /></ProtectedRoute>
           } />
           <Route path="/meus-relatorios" element={
-            <ProtectedRoute allowedRoles={['aluno', 'profissional']}>
-              <MeusRelatoriosPage />
-            </ProtectedRoute>
+            <ProtectedRoute allowedRoles={['aluno','profissional']}><MeusRelatoriosPage /></ProtectedRoute>
           } />
 
           {/* Profissional */}
           <Route path="/meus-pacientes" element={
-            <ProtectedRoute allowedRoles={['profissional']}>
-              <ProntuariosPage />
-            </ProtectedRoute>
+            <ProtectedRoute allowedRoles={['profissional']}><ProntuariosPage /></ProtectedRoute>
+          } />
+          <Route path="/prontuarios-profissional" element={
+            <ProtectedRoute allowedRoles={['profissional']}><ProntuariosPage /></ProtectedRoute>
           } />
 
           <Route path="*" element={<Navigate to="/" replace />} />
