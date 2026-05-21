@@ -22,6 +22,7 @@ import PaginaInicialPage from './pages/PaginaInicialPage';
 import AvaliacaoPage from './pages/AvaliacaoPage';
 import ParticipantesPage from './pages/ParticipantesPage';
 import RelatorioProjetoPage from './pages/RelatorioProjetoPage';
+import AgendaPage from './pages/AgendaPage';
 
 export default function App() {
   return (
@@ -68,10 +69,13 @@ export default function App() {
           <Route path="/prontuarios" element={
             <ProtectedRoute allowedRoles={['gestora']}><ProntuariosPage /></ProtectedRoute>
           } />
+          <Route path="/agenda" element={
+            <ProtectedRoute allowedRoles={['gestora']}><AgendaPage /></ProtectedRoute>
+          } />
 
           {/* Aluno */}
           <Route path="/atendimentos" element={
-            <ProtectedRoute allowedRoles={['aluno']}><ProntuariosPage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={['aluno']}><AgendaPage /></ProtectedRoute>
           } />
           <Route path="/prontuarios-aluno" element={
             <ProtectedRoute allowedRoles={['aluno']}><ProntuariosPage /></ProtectedRoute>
@@ -85,7 +89,7 @@ export default function App() {
 
           {/* Profissional */}
           <Route path="/meus-pacientes" element={
-            <ProtectedRoute allowedRoles={['profissional']}><ProntuariosPage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={['profissional']}><AgendaPage /></ProtectedRoute>
           } />
           <Route path="/prontuarios-profissional" element={
             <ProtectedRoute allowedRoles={['profissional']}><ProntuariosPage /></ProtectedRoute>
