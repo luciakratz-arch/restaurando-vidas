@@ -34,6 +34,7 @@ export default function Sidebar({ pendingCount = 0 }) {
       </div>
 
       <nav className="sidebar-nav">
+
         {/* Todos os perfis */}
         <span className="nav-section-title">Projeto</span>
         <NavItem icon="🏠" label="Página Inicial" path="/pagina-inicial" />
@@ -49,7 +50,7 @@ export default function Sidebar({ pendingCount = 0 }) {
           </>
         )}
 
-        {/* Indicar paciente */}
+        {/* Indicar paciente — Gestora, Pastor e Profissional */}
         {(isGestora || isPastor || isProfissional) && (
           <NavItem icon="♡" label="Indicar Paciente" path="/indicar" />
         )}
@@ -66,22 +67,23 @@ export default function Sidebar({ pendingCount = 0 }) {
           </>
         )}
 
-        {/* Aluno */}
+        {/* Aluno / Estagiário */}
         {isAluno && (
           <>
             <span className="nav-section-title">Clínica</span>
-            <NavItem icon="📋" label="Meus Atendimentos" path="/atendimentos" />
+            <NavItem icon="📅" label="Agenda de Atendimentos" path="/atendimentos" />
+            <NavItem icon="📋" label="Prontuários" path="/prontuarios-aluno" />
             <NavItem icon="⟳" label="Solicitar Especialista" path="/solicitar-especialista" />
-            <NavItem icon="◎" label="Meus Relatórios" path="/meus-relatorios" />
           </>
         )}
 
-        {/* Profissional */}
+        {/* Profissional de Saúde */}
         {isProfissional && (
           <>
             <span className="nav-section-title">Clínica</span>
-            <NavItem icon="📋" label="Meus Pacientes" path="/meus-pacientes" />
-            <NavItem icon="◎" label="Relatórios" path="/meus-relatorios" />
+            <NavItem icon="📅" label="Agenda de Atendimentos" path="/meus-pacientes" />
+            <NavItem icon="📋" label="Prontuários" path="/prontuarios-profissional" />
+            <NavItem icon="◎" label="Meus Relatórios" path="/meus-relatorios" />
           </>
         )}
 
@@ -92,6 +94,7 @@ export default function Sidebar({ pendingCount = 0 }) {
             <NavItem icon="★" label="Ver Avaliações" path="/avaliacoes" />
           </>
         )}
+
       </nav>
 
       <div className="sidebar-footer">
