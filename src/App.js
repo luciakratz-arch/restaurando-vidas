@@ -9,6 +9,7 @@ import LandingPage from './pages/LandingPage';
 import CadastroPage from './pages/CadastroPage';
 import LoginPage from './pages/LoginPage';
 import IndicarPublicoPage from './pages/IndicarPublicoPage';
+import AvaliacaoPublicaPage from './pages/AvaliacaoPublicaPage';
 import DashboardPage from './pages/DashboardPage';
 import IndicarPacientePage from './pages/IndicarPacientePage';
 import InterconsultasPage from './pages/InterconsultasPage';
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="/cadastro" element={<CadastroPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/indicar-paciente" element={<IndicarPublicoPage />} />
+          <Route path="/avaliacao/:token" element={<AvaliacaoPublicaPage />} />
 
           {/* Gestora + Pastor */}
           <Route path="/dashboard" element={
@@ -63,7 +65,6 @@ export default function App() {
           <Route path="/usuarios" element={
             <ProtectedRoute allowedRoles={['gestora']}><UsuariosPage /></ProtectedRoute>
           } />
-          {/* Prontuários — Gestora vê todos */}
           <Route path="/prontuarios" element={
             <ProtectedRoute allowedRoles={['gestora']}><ProntuariosPage /></ProtectedRoute>
           } />
