@@ -35,12 +35,10 @@ export default function Sidebar({ pendingCount = 0 }) {
 
       <nav className="sidebar-nav">
 
-        {/* Todos os perfis */}
         <span className="nav-section-title">Projeto</span>
         <NavItem icon="🏠" label="Página Inicial" path="/pagina-inicial" />
         <NavItem icon="❋" label="Equipe e Parceiros" path="/participantes" />
 
-        {/* Gestora + Pastor */}
         {(isGestora || isPastor) && (
           <>
             <span className="nav-section-title">Gestão</span>
@@ -50,16 +48,15 @@ export default function Sidebar({ pendingCount = 0 }) {
           </>
         )}
 
-        {/* Indicar paciente */}
         {(isGestora || isPastor || isProfissional) && (
           <NavItem icon="♡" label="Indicar Paciente" path="/indicar" />
         )}
 
-        {/* Gestora */}
         {isGestora && (
           <>
             <span className="nav-section-title">Clínica</span>
-            <NavItem icon="📅" label="Agenda de Atendimentos" path="/prontuarios" />
+            <NavItem icon="📅" label="Agenda de Atendimentos" path="/agenda" />
+            <NavItem icon="📋" label="Prontuários" path="/prontuarios" />
             <NavItem icon={`⟳${pendingCount > 0 ? ` (${pendingCount})` : ''}`} label="Interconsultas" path="/interconsultas" />
             <NavItem icon="◎" label="Relatórios Clínicos" path="/relatorios" />
             <span className="nav-section-title">Admin</span>
@@ -67,7 +64,6 @@ export default function Sidebar({ pendingCount = 0 }) {
           </>
         )}
 
-        {/* Aluno */}
         {isAluno && (
           <>
             <span className="nav-section-title">Clínica</span>
@@ -77,7 +73,6 @@ export default function Sidebar({ pendingCount = 0 }) {
           </>
         )}
 
-        {/* Profissional */}
         {isProfissional && (
           <>
             <span className="nav-section-title">Clínica</span>
@@ -87,7 +82,6 @@ export default function Sidebar({ pendingCount = 0 }) {
           </>
         )}
 
-        {/* Pastor */}
         {isPastor && (
           <>
             <span className="nav-section-title">Acompanhamento</span>
