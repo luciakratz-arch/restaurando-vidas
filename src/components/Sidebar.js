@@ -50,7 +50,7 @@ export default function Sidebar({ pendingCount = 0 }) {
           </>
         )}
 
-        {/* Indicar paciente — Gestora, Pastor e Profissional */}
+        {/* Indicar paciente */}
         {(isGestora || isPastor || isProfissional) && (
           <NavItem icon="♡" label="Indicar Paciente" path="/indicar" />
         )}
@@ -59,7 +59,7 @@ export default function Sidebar({ pendingCount = 0 }) {
         {isGestora && (
           <>
             <span className="nav-section-title">Clínica</span>
-            <NavItem icon="📋" label="Prontuários" path="/prontuarios" />
+            <NavItem icon="📅" label="Agenda de Atendimentos" path="/prontuarios" />
             <NavItem icon={`⟳${pendingCount > 0 ? ` (${pendingCount})` : ''}`} label="Interconsultas" path="/interconsultas" />
             <NavItem icon="◎" label="Relatórios Clínicos" path="/relatorios" />
             <span className="nav-section-title">Admin</span>
@@ -67,7 +67,7 @@ export default function Sidebar({ pendingCount = 0 }) {
           </>
         )}
 
-        {/* Aluno / Estagiário */}
+        {/* Aluno */}
         {isAluno && (
           <>
             <span className="nav-section-title">Clínica</span>
@@ -77,7 +77,7 @@ export default function Sidebar({ pendingCount = 0 }) {
           </>
         )}
 
-        {/* Profissional de Saúde */}
+        {/* Profissional */}
         {isProfissional && (
           <>
             <span className="nav-section-title">Clínica</span>
