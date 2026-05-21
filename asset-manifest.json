@@ -1,19 +1,19 @@
 {
   "files": {
     "main.css": "/restaurando-vidas/static/css/main.6fd165d7.css",
-    "main.js": "/restaurando-vidas/static/js/main.2e050a8a.js",
+    "main.js": "/restaurando-vidas/static/js/main.4da7329d.js",
     "static/js/239.87be5f8b.chunk.js": "/restaurando-vidas/static/js/239.87be5f8b.chunk.js",
     "static/js/213.2e454590.chunk.js": "/restaurando-vidas/static/js/213.2e454590.chunk.js",
-    "static/js/455.2c20865d.chunk.js": "/restaurando-vidas/static/js/455.2c20865d.chunk.js",
+    "static/js/455.7b2f790d.chunk.js": "/restaurando-vidas/static/js/455.7b2f790d.chunk.js",
     "index.html": "/restaurando-vidas/index.html",
     "main.6fd165d7.css.map": "/restaurando-vidas/static/css/main.6fd165d7.css.map",
-    "main.2e050a8a.js.map": "/restaurando-vidas/static/js/main.2e050a8a.js.map",
+    "main.4da7329d.js.map": "/restaurando-vidas/static/js/main.4da7329d.js.map",
     "239.87be5f8b.chunk.js.map": "/restaurando-vidas/static/js/239.87be5f8b.chunk.js.map",
     "213.2e454590.chunk.js.map": "/restaurando-vidas/static/js/213.2e454590.chunk.js.map",
-    "455.2c20865d.chunk.js.map": "/restaurando-vidas/static/js/455.2c20865d.chunk.js.map"
+    "455.7b2f790d.chunk.js.map": "/restaurando-vidas/static/js/455.7b2f790d.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.6fd165d7.css",
-    "static/js/main.2e050a8a.js"
+    "static/js/main.4da7329d.js"
   ]
 }
