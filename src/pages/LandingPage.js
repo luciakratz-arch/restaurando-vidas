@@ -2,16 +2,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function Estrelas({ n }) {
-  return (
-    <div style={{ display: 'flex', gap: 2 }}>
-      {[1,2,3,4,5].map(i => (
-        <span key={i} style={{ color: i <= n ? '#D4AF37' : '#333', fontSize: 20 }}>★</span>
-      ))}
-    </div>
-  );
-}
-
 const HISTORIA = `O Projeto Restaurando Vidas nasceu na cidade de São Paulo, sob a liderança de Max, como um braço missionário da iniciativa "Papo com Deus". O projeto surge da identificação de uma urgência latente: o cuidado integral com a saúde emocional e espiritual das pessoas. Unindo a fé e a ciência, a iniciativa estruturou uma rede de apoio especializada que conta com a atuação dedicada de psicólogos, psiquiatras e estagiários de psicologia. Nosso propósito é acolher o sofrimento humano com excelência técnica, ética e amor cristão, oferecendo suporte psicológico a quem mais precisa e restaurando a dignidade e a esperança de cada indivíduo assistido.`;
 
 const MISSAO = `Missão: Promover a restauração integral de vidas por meio do cuidado em saúde mental e espiritual, integrando profissionais da saúde e a comunidade cristã. Visão: Ser referência em acolhimento psicossocial e espiritual ONLINE, expandindo a rede de profissionais e estagiários para alcançar e transformar cada vez mais realidades.`;
@@ -54,6 +44,11 @@ export default function LandingPage() {
           </div>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
+          <button onClick={() => navigate('/indicar-paciente')} style={{
+            padding: '10px 24px', borderRadius: 8, background: 'transparent',
+            border: '1px solid rgba(212,175,55,0.4)', color: '#D4AF37',
+            cursor: 'pointer', fontFamily: 'Raleway', fontWeight: 600, fontSize: 14,
+          }}>💙 Indicar Paciente</button>
           <button onClick={() => navigate('/login')} style={{
             padding: '10px 24px', borderRadius: 8, background: 'transparent',
             border: '1px solid rgba(212,175,55,0.4)', color: '#D4AF37',
@@ -89,11 +84,42 @@ export default function LandingPage() {
             padding: '16px 40px', borderRadius: 10, background: '#D4AF37',
             border: 'none', color: '#000', cursor: 'pointer', fontFamily: 'Raleway', fontWeight: 700, fontSize: 16,
           }}>Solicitar Acesso ao Sistema →</button>
+          <button onClick={() => navigate('/indicar-paciente')} style={{
+            padding: '16px 40px', borderRadius: 10, background: 'transparent',
+            border: '1px solid rgba(212,175,55,0.5)', color: '#D4AF37',
+            cursor: 'pointer', fontFamily: 'Raleway', fontWeight: 600, fontSize: 16,
+          }}>💙 Indicar um Paciente</button>
           <button onClick={() => navigate('/login')} style={{
             padding: '16px 40px', borderRadius: 10, background: 'transparent',
             border: '1px solid rgba(212,175,55,0.3)', color: '#9A9080',
             cursor: 'pointer', fontFamily: 'Raleway', fontWeight: 600, fontSize: 16,
           }}>Já tenho acesso</button>
+        </div>
+      </section>
+
+      {/* Seção Indicar Paciente em destaque */}
+      <section style={{
+        padding: '56px 40px', background: '#0d0d0d',
+        borderBottom: '1px solid rgba(212,175,55,0.1)',
+      }}>
+        <div style={{ maxWidth: 720, margin: '0 auto', textAlign: 'center' }}>
+          <div style={{ fontSize: 40, marginBottom: 16 }}>💙</div>
+          <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 24, color: '#D4AF37', marginBottom: 14 }}>
+            Conhece alguém que precisa de apoio?
+          </h2>
+          <p style={{ color: '#9A9080', fontSize: 15, lineHeight: 1.9, marginBottom: 28, maxWidth: 560, margin: '0 auto 28px' }}>
+            Pastores, líderes e membros da comunidade podem indicar pessoas que precisam de acompanhamento psicológico gratuito. O processo é simples, rápido e sigiloso. Nossa equipe entrará em contato.
+          </p>
+          <button onClick={() => navigate('/indicar-paciente')} style={{
+            padding: '15px 44px', borderRadius: 10, background: '#D4AF37',
+            border: 'none', color: '#000', cursor: 'pointer',
+            fontFamily: 'Raleway', fontWeight: 700, fontSize: 16,
+          }}>
+            💙 Indicar Paciente Agora
+          </button>
+          <div style={{ marginTop: 14, fontSize: 12, color: '#5A5048' }}>
+            Não é necessário criar conta · 100% gratuito
+          </div>
         </div>
       </section>
 
@@ -150,9 +176,7 @@ export default function LandingPage() {
               </div>
               <div style={{ fontSize: 13, color: '#F0D060', fontStyle: 'italic', margin: '12px 0' }}>{p.especializacao}</div>
               <p style={{ fontSize: 13, color: '#9A9080', lineHeight: 1.8 }}>{p.curriculo}</p>
-              {p.email && (
-                <div style={{ marginTop: 16, fontSize: 13, color: '#D4AF37' }}>✉ {p.email}</div>
-              )}
+              {p.email && <div style={{ marginTop: 16, fontSize: 13, color: '#D4AF37' }}>✉ {p.email}</div>}
             </div>
           ))}
         </div>
@@ -168,10 +192,17 @@ export default function LandingPage() {
         <p style={{ color: '#9A9080', fontSize: 15, maxWidth: 500, margin: '0 auto 40px' }}>
           Pastores, estagiários e profissionais de saúde podem solicitar acesso ao sistema.
         </p>
-        <button onClick={() => navigate('/cadastro')} style={{
-          padding: '18px 48px', borderRadius: 10, background: '#D4AF37',
-          border: 'none', color: '#000', cursor: 'pointer', fontFamily: 'Raleway', fontWeight: 700, fontSize: 18,
-        }}>Solicitar Acesso →</button>
+        <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button onClick={() => navigate('/cadastro')} style={{
+            padding: '18px 48px', borderRadius: 10, background: '#D4AF37',
+            border: 'none', color: '#000', cursor: 'pointer', fontFamily: 'Raleway', fontWeight: 700, fontSize: 18,
+          }}>Solicitar Acesso →</button>
+          <button onClick={() => navigate('/indicar-paciente')} style={{
+            padding: '18px 48px', borderRadius: 10, background: 'transparent',
+            border: '1px solid rgba(212,175,55,0.4)', color: '#D4AF37',
+            cursor: 'pointer', fontFamily: 'Raleway', fontWeight: 600, fontSize: 18,
+          }}>💙 Indicar Paciente</button>
+        </div>
       </section>
 
       {/* Footer */}
