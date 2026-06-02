@@ -55,22 +55,22 @@ export default function App() {
           <Route path="/indicar" element={
             <ProtectedRoute allowedRoles={['gestora','pastor','profissional']}><IndicarPacientePage /></ProtectedRoute>
           } />
-
-          {/* Gestora */}
+          <Route path="/agenda" element={
+            <ProtectedRoute allowedRoles={['gestora','pastor']}><AgendaPage /></ProtectedRoute>
+          } />
           <Route path="/interconsultas" element={
-            <ProtectedRoute allowedRoles={['gestora']}><InterconsultasPage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={['gestora','pastor']}><InterconsultasPage /></ProtectedRoute>
           } />
           <Route path="/relatorios" element={
-            <ProtectedRoute allowedRoles={['gestora']}><RelatoriosPage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={['gestora','pastor']}><RelatoriosPage /></ProtectedRoute>
           } />
           <Route path="/usuarios" element={
-            <ProtectedRoute allowedRoles={['gestora']}><UsuariosPage /></ProtectedRoute>
+            <ProtectedRoute allowedRoles={['gestora','pastor']}><UsuariosPage /></ProtectedRoute>
           } />
+
+          {/* Gestora apenas */}
           <Route path="/prontuarios" element={
             <ProtectedRoute allowedRoles={['gestora']}><ProntuariosPage /></ProtectedRoute>
-          } />
-          <Route path="/agenda" element={
-            <ProtectedRoute allowedRoles={['gestora']}><AgendaPage /></ProtectedRoute>
           } />
 
           {/* Aluno */}
