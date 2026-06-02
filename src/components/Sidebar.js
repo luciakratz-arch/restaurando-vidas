@@ -35,10 +35,12 @@ export default function Sidebar({ pendingCount = 0 }) {
 
       <nav className="sidebar-nav">
 
+        {/* Todos os perfis */}
         <span className="nav-section-title">Projeto</span>
         <NavItem icon="🏠" label="Página Inicial" path="/pagina-inicial" />
         <NavItem icon="❋" label="Equipe e Parceiros" path="/participantes" />
 
+        {/* Gestora + Pastor: Gestão */}
         {(isGestora || isPastor) && (
           <>
             <span className="nav-section-title">Gestão</span>
@@ -48,10 +50,12 @@ export default function Sidebar({ pendingCount = 0 }) {
           </>
         )}
 
+        {/* Gestora + Pastor + Profissional: Indicar */}
         {(isGestora || isPastor || isProfissional) && (
           <NavItem icon="♡" label="Indicar Paciente" path="/indicar" />
         )}
 
+        {/* Gestora: tudo */}
         {isGestora && (
           <>
             <span className="nav-section-title">Clínica</span>
@@ -64,6 +68,19 @@ export default function Sidebar({ pendingCount = 0 }) {
           </>
         )}
 
+        {/* Pastor: tudo exceto prontuários */}
+        {isPastor && (
+          <>
+            <span className="nav-section-title">Clínica</span>
+            <NavItem icon="📅" label="Agenda de Atendimentos" path="/agenda" />
+            <NavItem icon={`⟳${pendingCount > 0 ? ` (${pendingCount})` : ''}`} label="Interconsultas" path="/interconsultas" />
+            <NavItem icon="◎" label="Relatórios Clínicos" path="/relatorios" />
+            <span className="nav-section-title">Admin</span>
+            <NavItem icon="❋" label="Usuários" path="/usuarios" />
+          </>
+        )}
+
+        {/* Aluno */}
         {isAluno && (
           <>
             <span className="nav-section-title">Clínica</span>
@@ -73,19 +90,13 @@ export default function Sidebar({ pendingCount = 0 }) {
           </>
         )}
 
+        {/* Profissional */}
         {isProfissional && (
           <>
             <span className="nav-section-title">Clínica</span>
             <NavItem icon="📅" label="Agenda de Atendimentos" path="/meus-pacientes" />
             <NavItem icon="📋" label="Prontuários" path="/prontuarios-profissional" />
             <NavItem icon="◎" label="Meus Relatórios" path="/meus-relatorios" />
-          </>
-        )}
-
-        {isPastor && (
-          <>
-            <span className="nav-section-title">Acompanhamento</span>
-            <NavItem icon="★" label="Ver Avaliações" path="/avaliacoes" />
           </>
         )}
 
