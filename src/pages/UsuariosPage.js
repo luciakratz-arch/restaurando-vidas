@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import {
   collection, query, onSnapshot, doc,
-  updateDoc, serverTimestamp, setDoc, orderBy
+  updateDoc, serverTimestamp, setDoc, orderBy, deleteDoc
 } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { useAuth, ROLES } from '../contexts/AuthContext';
@@ -75,6 +75,22 @@ export default function UsuariosPage() {
   const rejeitar = async (sol) => {
     if (!window.confirm(`Rejeitar ${sol.nome}?`)) return;
     await updateDoc(doc(db, 'solicitacoes', sol.id), { status: 'rejeitada', updatedAt: serverTimestamp() });
+  };
+
+  const excluirUsuario = async (u) => {
+    if (!window.confirm(`Excluir o usuário "${u.nome}"? Esta ação não pode ser desfeita.`)) return;
+    try {
+      await deleteDoc(doc(db, 'users', u.id));
+      setSuccess(`Usuário ${u.nome} excluído.`);
+    } catch (err) { console.error(err); }
+  };
+
+  const excluirPaciente = async (p) => {
+    if (!window.confirm(`Excluir o paciente "${p.nome}"? Esta ação não pode ser desfeita.`)) return;
+    try {
+      await deleteDoc(doc(db, 'pacientes', p.id));
+      setSuccess(`Paciente ${p.nome} excluído.`);
+    } catch (err) { console.error(err); }
   };
 
   const salvarEdicao = async () => {
@@ -172,9 +188,9 @@ export default function UsuariosPage() {
                         setEditForm({ nome: u.nome, role: u.role, especialidade: u.especialidade || '', active: u.active });
                       }}>✎ Editar</button>
                       {u.role !== ROLES.GESTORA && (
-                        <button className={`btn btn-sm ${u.active ? 'btn-danger' : 'btn-outline'}`}
-                          onClick={() => updateDoc(doc(db, 'users', u.id), { active: !u.active })}>
-                          {u.active ? 'Desativar' : 'Ativar'}
+                        <button className="btn btn-sm" onClick={() => excluirUsuario(u)}
+                          style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 12 }}>
+                          🗑 Excluir
                         </button>
                       )}
                     </div>
@@ -188,33 +204,29 @@ export default function UsuariosPage() {
 
       {/* ABA PACIENTES */}
       {aba === 'pacientes' && (
-        pacientes.length === 0 ? (
-          <div className="card" style={{ textAlign: 'center', padding: 60 }}>
-            <p style={{ color: 'var(--text-muted)' }}>Nenhum paciente cadastrado ainda.</p>
-          </div>
-        ) : (
-          <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Nome</th><th>Telefone</th><th>Demanda</th>
-                  <th>Estagiário</th><th>Profissional</th>
-                  <th>Status</th><th>Cadastrado em</th><th>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pacientes.map((p) => {
-                  const st = STATUS_PACIENTE[p.status] || { label: p.status, cls: 'badge-gold' };
-                  return (
-                    <tr key={p.id}>
-                      <td style={{ fontWeight: 600 }}>{p.nome}</td>
-                      <td style={{ color: 'var(--text-secondary)' }}>{p.telefone}</td>
-                      <td style={{ color: 'var(--text-secondary)', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.demanda}</td>
-                      <td style={{ color: 'var(--text-secondary)' }}>{getNome(p.alunoResponsavel)}</td>
-                      <td style={{ color: 'var(--text-secondary)' }}>{getNome(p.profissionalResponsavel)}</td>
-                      <td><span className={`badge ${st.cls}`}>{st.label}</span></td>
-                      <td style={{ color: 'var(--text-secondary)' }}>{fmtDate(p.createdAt)}</td>
-                      <td>
+        <div className="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th><th>Telefone</th><th>Demanda</th>
+                <th>Estagiário</th><th>Profissional</th>
+                <th>Status</th><th>Cadastrado em</th><th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pacientes.map((p) => {
+                const st = STATUS_PACIENTE[p.status] || { label: p.status, cls: 'badge-gold' };
+                return (
+                  <tr key={p.id}>
+                    <td style={{ fontWeight: 600 }}>{p.nome}</td>
+                    <td style={{ color: 'var(--text-secondary)' }}>{p.telefone}</td>
+                    <td style={{ color: 'var(--text-secondary)', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.demanda}</td>
+                    <td style={{ color: 'var(--text-secondary)' }}>{getNome(p.alunoResponsavel)}</td>
+                    <td style={{ color: 'var(--text-secondary)' }}>{getNome(p.profissionalResponsavel)}</td>
+                    <td><span className={`badge ${st.cls}`}>{st.label}</span></td>
+                    <td style={{ color: 'var(--text-secondary)' }}>{fmtDate(p.createdAt)}</td>
+                    <td>
+                      <div style={{ display: 'flex', gap: 8 }}>
                         <button className="btn btn-gold btn-sm" onClick={() => {
                           setEditPaciente(p.id);
                           setEditPacForm({
@@ -224,14 +236,18 @@ export default function UsuariosPage() {
                             observacoes: p.observacoes || '',
                           });
                         }}>✎ Gerenciar</button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )
+                        <button className="btn btn-sm" onClick={() => excluirPaciente(p)}
+                          style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 12 }}>
+                          🗑 Excluir
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {/* ABA SOLICITAÇÕES */}
