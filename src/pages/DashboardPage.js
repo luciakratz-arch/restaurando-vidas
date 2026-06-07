@@ -1,7 +1,8 @@
 // src/pages/DashboardPage.js
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import { collection, query, where, onSnapshot, orderBy, limit, getDocs } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import { collection, query, where, onSnapshot, orderBy, limit } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { format } from 'date-fns';
@@ -9,6 +10,7 @@ import { ptBR } from 'date-fns/locale';
 
 export default function DashboardPage() {
   const { isGestora, isPastor } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     pacientesAtivos: 0,
     interconsultasPendentes: 0,
@@ -19,25 +21,21 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Pacientes ativos
     const qPac = query(collection(db, 'pacientes'), where('status', '==', 'ativo'));
     const unPac = onSnapshot(qPac, (s) => {
       setStats(prev => ({ ...prev, pacientesAtivos: s.size }));
     });
 
-    // Interconsultas pendentes
     const qInt = query(collection(db, 'interconsultas'), where('status', '==', 'pendente'));
     const unInt = onSnapshot(qInt, (s) => {
       setStats(prev => ({ ...prev, interconsultasPendentes: s.size }));
     });
 
-    // Relatórios pendentes
     const qRel = query(collection(db, 'relatorios'), where('status', '==', 'pendente_revisao'));
     const unRel = onSnapshot(qRel, (s) => {
       setStats(prev => ({ ...prev, relatoriosPendentes: s.size }));
     });
 
-    // Pacientes recentes
     const qRecent = query(collection(db, 'pacientes'), orderBy('createdAt', 'desc'), limit(5));
     const unRecent = onSnapshot(qRecent, (s) => {
       setRecentPatients(s.docs.map(d => ({ id: d.id, ...d.data() })));
@@ -84,7 +82,10 @@ export default function DashboardPage() {
         <div className="alert alert-warning" style={{ marginBottom: 24 }}>
           <span>⟳</span>
           <strong>{stats.interconsultasPendentes} interconsulta(s)</strong> aguardando sua aprovação.
-          <a href="/interconsultas" style={{ color: 'var(--gold)', marginLeft: 8 }}>Ver agora →</a>
+          <button onClick={() => navigate('/interconsultas')}
+            style={{ background: 'none', border: 'none', color: 'var(--gold)', marginLeft: 8, cursor: 'pointer', fontWeight: 600 }}>
+            Ver agora →
+          </button>
         </div>
       )}
 
@@ -92,7 +93,9 @@ export default function DashboardPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <h3 style={{ fontSize: 16 }}>Pacientes Recentes</h3>
           {(isGestora || isPastor) && (
-            <a href="/indicar" className="btn btn-outline btn-sm">+ Indicar Paciente</a>
+            <button onClick={() => navigate('/indicar')} className="btn btn-outline btn-sm">
+              + Indicar Paciente
+            </button>
           )}
         </div>
 
