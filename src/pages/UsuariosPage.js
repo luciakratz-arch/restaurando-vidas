@@ -63,8 +63,8 @@ export default function UsuariosPage() {
     try {
       await setDoc(doc(db, 'users', sol.uid), {
         nome: sol.nome, email: sol.email, role: sol.role,
-        especialidade: sol.especialidade || '', active: true,
-        uid: sol.uid, createdAt: serverTimestamp(),
+        especialidade: sol.especialidade || '', periodo: sol.periodo || '',
+        active: true, uid: sol.uid, createdAt: serverTimestamp(),
       });
       await updateDoc(doc(db, 'solicitacoes', sol.id), { status: 'aprovada', updatedAt: serverTimestamp() });
       setSuccess(`${sol.nome} aprovado!`);
@@ -113,6 +113,25 @@ export default function UsuariosPage() {
     finally { setSaving(false); }
   };
 
+  // Toggle aluno na lista múltipla
+  const toggleAluno = (alunoId) => {
+    const atual = editPacForm.alunosResponsaveis || [];
+    if (atual.includes(alunoId)) {
+      setEditPacForm(p => ({ ...p, alunosResponsaveis: atual.filter(id => id !== alunoId) }));
+    } else {
+      setEditPacForm(p => ({ ...p, alunosResponsaveis: [...atual, alunoId] }));
+    }
+  };
+
+  const getNomes = (ids) => {
+    if (!ids || ids.length === 0) return '—';
+    if (typeof ids === 'string') {
+      const u = users.find(u => u.id === ids);
+      return u?.nome || '—';
+    }
+    return ids.map(id => users.find(u => u.id === id)?.nome).filter(Boolean).join(', ') || '—';
+  };
+
   const fmtDate = (ts) => ts?.toDate ? format(ts.toDate(), 'dd/MM/yyyy', { locale: ptBR }) : '—';
 
   const roleMap = {
@@ -120,16 +139,13 @@ export default function UsuariosPage() {
     [ROLES.ALUNO]: 'badge-success', [ROLES.PROFISSIONAL]: 'badge-warning',
   };
 
-  const getNome = (uid) => {
-    const u = users.find(u => u.id === uid);
-    return u?.nome || '—';
-  };
-
   const abas = [
     { key: 'usuarios', label: `Usuários (${users.length})` },
     { key: 'pacientes', label: `Pacientes (${pacientes.length})` },
     { key: 'solicitacoes', label: `Solicitações${pendentes.length > 0 ? ` (${pendentes.length})` : ''}` },
   ];
+
+  const btnExcluir = { background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 12 };
 
   return (
     <Layout>
@@ -165,7 +181,7 @@ export default function UsuariosPage() {
             <thead>
               <tr>
                 <th>Nome</th><th>E-mail</th><th>Perfil</th>
-                <th>Especialidade</th><th>Status</th><th>Ações</th>
+                <th>Especialidade</th><th>Período</th><th>Status</th><th>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -175,6 +191,7 @@ export default function UsuariosPage() {
                   <td style={{ color: 'var(--text-secondary)', fontSize: 13 }}>{u.email}</td>
                   <td><span className={`badge ${roleMap[u.role] || 'badge-gold'}`}>{ROLE_LABELS[u.role] || u.role}</span></td>
                   <td style={{ color: 'var(--text-secondary)' }}>{u.especialidade || '—'}</td>
+                  <td style={{ color: 'var(--text-secondary)', fontSize: 13 }}>{u.periodo || '—'}</td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span className={`status-dot ${u.active ? 'active' : 'inactive'}`} />
@@ -185,11 +202,10 @@ export default function UsuariosPage() {
                     <div style={{ display: 'flex', gap: 8 }}>
                       <button className="btn btn-outline btn-sm" onClick={() => {
                         setEditando(u.id);
-                        setEditForm({ nome: u.nome, role: u.role, especialidade: u.especialidade || '', active: u.active });
+                        setEditForm({ nome: u.nome, role: u.role, especialidade: u.especialidade || '', periodo: u.periodo || '', active: u.active });
                       }}>✎ Editar</button>
                       {u.role !== ROLES.GESTORA && (
-                        <button className="btn btn-sm" onClick={() => excluirUsuario(u)}
-                          style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 12 }}>
+                        <button className="btn btn-sm" style={btnExcluir} onClick={() => excluirUsuario(u)}>
                           🗑 Excluir
                         </button>
                       )}
@@ -209,7 +225,7 @@ export default function UsuariosPage() {
             <thead>
               <tr>
                 <th>Nome</th><th>Telefone</th><th>Demanda</th>
-                <th>Estagiário</th><th>Profissional</th>
+                <th>Estagiário(s)</th><th>Profissional</th>
                 <th>Status</th><th>Cadastrado em</th><th>Ações</th>
               </tr>
             </thead>
@@ -220,9 +236,9 @@ export default function UsuariosPage() {
                   <tr key={p.id}>
                     <td style={{ fontWeight: 600 }}>{p.nome}</td>
                     <td style={{ color: 'var(--text-secondary)' }}>{p.telefone}</td>
-                    <td style={{ color: 'var(--text-secondary)', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.demanda}</td>
-                    <td style={{ color: 'var(--text-secondary)' }}>{getNome(p.alunoResponsavel)}</td>
-                    <td style={{ color: 'var(--text-secondary)' }}>{getNome(p.profissionalResponsavel)}</td>
+                    <td style={{ color: 'var(--text-secondary)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.demanda}</td>
+                    <td style={{ color: 'var(--text-secondary)', fontSize: 13 }}>{getNomes(p.alunosResponsaveis || p.alunoResponsavel)}</td>
+                    <td style={{ color: 'var(--text-secondary)' }}>{getNomes(p.profissionalResponsavel)}</td>
                     <td><span className={`badge ${st.cls}`}>{st.label}</span></td>
                     <td style={{ color: 'var(--text-secondary)' }}>{fmtDate(p.createdAt)}</td>
                     <td>
@@ -231,13 +247,12 @@ export default function UsuariosPage() {
                           setEditPaciente(p.id);
                           setEditPacForm({
                             status: p.status || 'pendente',
-                            alunoResponsavel: p.alunoResponsavel || '',
+                            alunosResponsaveis: p.alunosResponsaveis || (p.alunoResponsavel ? [p.alunoResponsavel] : []),
                             profissionalResponsavel: p.profissionalResponsavel || '',
                             observacoes: p.observacoes || '',
                           });
                         }}>✎ Gerenciar</button>
-                        <button className="btn btn-sm" onClick={() => excluirPaciente(p)}
-                          style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 12 }}>
+                        <button className="btn btn-sm" style={btnExcluir} onClick={() => excluirPaciente(p)}>
                           🗑 Excluir
                         </button>
                       </div>
@@ -260,10 +275,7 @@ export default function UsuariosPage() {
           <div className="table-container">
             <table>
               <thead>
-                <tr>
-                  <th>Nome</th><th>E-mail</th><th>Perfil</th>
-                  <th>Especialidade</th><th>Status</th><th>Ações</th>
-                </tr>
+                <tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Especialidade</th><th>Status</th><th>Ações</th></tr>
               </thead>
               <tbody>
                 {solicitacoes.map((s) => (
@@ -321,6 +333,12 @@ export default function UsuariosPage() {
                   onChange={(e) => setEditForm(p => ({ ...p, especialidade: e.target.value }))} />
               </div>
               <div className="form-group">
+                <label className="form-label">Período do Estágio</label>
+                <input className="form-control" value={editForm.periodo}
+                  onChange={(e) => setEditForm(p => ({ ...p, periodo: e.target.value }))}
+                  placeholder="Ex: Mar/2026 - Jul/2026" />
+              </div>
+              <div className="form-group">
                 <label className="form-label">Status</label>
                 <select className="form-control" value={editForm.active ? 'true' : 'false'}
                   onChange={(e) => setEditForm(p => ({ ...p, active: e.target.value === 'true' }))}>
@@ -358,14 +376,42 @@ export default function UsuariosPage() {
                   ))}
                 </select>
               </div>
+
+              {/* Múltiplos alunos */}
               <div className="form-group">
-                <label className="form-label">Atribuir Estagiário</label>
-                <select className="form-control" value={editPacForm.alunoResponsavel}
-                  onChange={(e) => setEditPacForm(p => ({ ...p, alunoResponsavel: e.target.value }))}>
-                  <option value="">Nenhum</option>
-                  {alunos.map(a => <option key={a.id} value={a.id}>{a.nome}</option>)}
-                </select>
+                <label className="form-label">Estagiários Responsáveis (pode selecionar vários)</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 180, overflowY: 'auto', padding: '8px 0' }}>
+                  {alunos.length === 0 ? (
+                    <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>Nenhum estagiário ativo.</span>
+                  ) : alunos.map(a => {
+                    const selecionado = (editPacForm.alunosResponsaveis || []).includes(a.id);
+                    return (
+                      <div key={a.id}
+                        onClick={() => toggleAluno(a.id)}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          padding: '8px 12px', borderRadius: 8, cursor: 'pointer',
+                          background: selecionado ? 'var(--gold-muted)' : 'var(--bg-secondary)',
+                          border: `1px solid ${selecionado ? 'var(--gold-border)' : 'var(--border)'}`,
+                        }}>
+                        <div style={{
+                          width: 18, height: 18, borderRadius: 4, flexShrink: 0,
+                          background: selecionado ? 'var(--gold)' : 'transparent',
+                          border: `2px solid ${selecionado ? 'var(--gold)' : 'var(--border)'}`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                          {selecionado && <span style={{ fontSize: 11, color: '#000', fontWeight: 700 }}>✓</span>}
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 14, fontWeight: 600 }}>{a.nome}</div>
+                          {a.periodo && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{a.periodo}</div>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
+
               <div className="form-group">
                 <label className="form-label">Atribuir Profissional de Saúde</label>
                 <select className="form-control" value={editPacForm.profissionalResponsavel}
