@@ -1,19 +1,19 @@
 {
   "files": {
     "main.css": "/restaurando-vidas/static/css/main.6fd165d7.css",
-    "main.js": "/restaurando-vidas/static/js/main.a0122c67.js",
+    "main.js": "/restaurando-vidas/static/js/main.c968aa57.js",
     "static/js/239.87be5f8b.chunk.js": "/restaurando-vidas/static/js/239.87be5f8b.chunk.js",
     "static/js/213.2e454590.chunk.js": "/restaurando-vidas/static/js/213.2e454590.chunk.js",
     "static/js/455.7b2f790d.chunk.js": "/restaurando-vidas/static/js/455.7b2f790d.chunk.js",
     "index.html": "/restaurando-vidas/index.html",
     "main.6fd165d7.css.map": "/restaurando-vidas/static/css/main.6fd165d7.css.map",
-    "main.a0122c67.js.map": "/restaurando-vidas/static/js/main.a0122c67.js.map",
+    "main.c968aa57.js.map": "/restaurando-vidas/static/js/main.c968aa57.js.map",
     "239.87be5f8b.chunk.js.map": "/restaurando-vidas/static/js/239.87be5f8b.chunk.js.map",
     "213.2e454590.chunk.js.map": "/restaurando-vidas/static/js/213.2e454590.chunk.js.map",
     "455.7b2f790d.chunk.js.map": "/restaurando-vidas/static/js/455.7b2f790d.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.6fd165d7.css",
-    "static/js/main.a0122c67.js"
+    "static/js/main.c968aa57.js"
   ]
 }
