@@ -5,7 +5,8 @@ import {
   collection, query, onSnapshot, doc,
   updateDoc, serverTimestamp, setDoc, orderBy, deleteDoc
 } from 'firebase/firestore';
-import { db } from '../services/firebase';
+import { db, auth } from '../services/firebase';
+import { sendPasswordResetEmail } from 'firebase/auth';
 import { useAuth, ROLES } from '../contexts/AuthContext';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -39,6 +40,7 @@ export default function UsuariosPage() {
   const [editPacForm, setEditPacForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
+  const [resetSent, setResetSent] = useState('');
 
   useEffect(() => {
     const unUsers = onSnapshot(query(collection(db, 'users')), (s) => {
@@ -113,7 +115,14 @@ export default function UsuariosPage() {
     finally { setSaving(false); }
   };
 
-  // Toggle aluno na lista múltipla
+  const redefinirSenha = async (email) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setResetSent(email);
+      setTimeout(() => setResetSent(''), 5000);
+    } catch (err) { console.error(err); }
+  };
+
   const toggleAluno = (alunoId) => {
     const atual = editPacForm.alunosResponsaveis || [];
     if (atual.includes(alunoId)) {
@@ -162,6 +171,12 @@ export default function UsuariosPage() {
         </div>
       )}
 
+      {resetSent && (
+        <div className="alert alert-success" style={{ marginBottom: 20 }}>
+          ✉ E-mail de redefinição enviado para {resetSent}!
+        </div>
+      )}
+
       {/* Abas */}
       <div style={{ display: 'flex', gap: 4, marginBottom: 24, borderBottom: '1px solid var(--gold-border)' }}>
         {abas.map(a => (
@@ -199,10 +214,10 @@ export default function UsuariosPage() {
                     </div>
                   </td>
                   <td>
-                    <div style={{ display: 'flex', gap: 8 }}>
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                       <button className="btn btn-outline btn-sm" onClick={() => {
                         setEditando(u.id);
-                        setEditForm({ nome: u.nome, role: u.role, especialidade: u.especialidade || '', periodo: u.periodo || '', active: u.active });
+                        setEditForm({ nome: u.nome, email: u.email, role: u.role, especialidade: u.especialidade || '', periodo: u.periodo || '', active: u.active });
                       }}>✎ Editar</button>
                       {u.role !== ROLES.GESTORA && (
                         <button className="btn btn-sm" style={btnExcluir} onClick={() => excluirUsuario(u)}>
@@ -242,7 +257,7 @@ export default function UsuariosPage() {
                     <td><span className={`badge ${st.cls}`}>{st.label}</span></td>
                     <td style={{ color: 'var(--text-secondary)' }}>{fmtDate(p.createdAt)}</td>
                     <td>
-                      <div style={{ display: 'flex', gap: 8 }}>
+                      <div style={{ display: 'flex', gap: 6 }}>
                         <button className="btn btn-gold btn-sm" onClick={() => {
                           setEditPaciente(p.id);
                           setEditPacForm({
@@ -315,6 +330,22 @@ export default function UsuariosPage() {
                 onClick={() => setEditando(null)}>✕</button>
             </div>
             <div className="modal-body">
+              {/* E-mail visível */}
+              <div className="form-group">
+                <label className="form-label">E-mail</label>
+                <div style={{ padding: '10px 14px', background: 'var(--bg-secondary)', borderRadius: 8, border: '1px solid var(--border)', fontSize: 14, color: 'var(--text-secondary)' }}>
+                  {editForm.email}
+                </div>
+              </div>
+              {/* Botão redefinir senha */}
+              <div className="form-group">
+                <button className="btn btn-outline btn-sm" onClick={() => redefinirSenha(editForm.email)}>
+                  ✉ Enviar e-mail de redefinição de senha
+                </button>
+                {resetSent === editForm.email && (
+                  <span style={{ marginLeft: 10, fontSize: 12, color: '#22C55E' }}>✓ E-mail enviado!</span>
+                )}
+              </div>
               <div className="form-group">
                 <label className="form-label">Nome</label>
                 <input className="form-control" value={editForm.nome}
@@ -376,8 +407,6 @@ export default function UsuariosPage() {
                   ))}
                 </select>
               </div>
-
-              {/* Múltiplos alunos */}
               <div className="form-group">
                 <label className="form-label">Estagiários Responsáveis (pode selecionar vários)</label>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 180, overflowY: 'auto', padding: '8px 0' }}>
@@ -386,8 +415,7 @@ export default function UsuariosPage() {
                   ) : alunos.map(a => {
                     const selecionado = (editPacForm.alunosResponsaveis || []).includes(a.id);
                     return (
-                      <div key={a.id}
-                        onClick={() => toggleAluno(a.id)}
+                      <div key={a.id} onClick={() => toggleAluno(a.id)}
                         style={{
                           display: 'flex', alignItems: 'center', gap: 10,
                           padding: '8px 12px', borderRadius: 8, cursor: 'pointer',
@@ -411,16 +439,13 @@ export default function UsuariosPage() {
                   })}
                 </div>
               </div>
-
               <div className="form-group">
                 <label className="form-label">Atribuir Profissional de Saúde</label>
                 <select className="form-control" value={editPacForm.profissionalResponsavel}
                   onChange={(e) => setEditPacForm(p => ({ ...p, profissionalResponsavel: e.target.value }))}>
                   <option value="">Nenhum</option>
                   {profissionais.map(p => (
-                    <option key={p.id} value={p.id}>
-                      {p.nome}{p.especialidade ? ` — ${p.especialidade}` : ''}
-                    </option>
+                    <option key={p.id} value={p.id}>{p.nome}{p.especialidade ? ` — ${p.especialidade}` : ''}</option>
                   ))}
                 </select>
               </div>
