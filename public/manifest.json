@@ -2,7 +2,7 @@
   "name": "Restaurando Vidas",
   "short_name": "Rest. Vidas",
   "description": "Sistema de Gestão Clínica — Restaurando Vidas · Cuidado da Alma",
-  "start_url": "/restaurando-vidas/#/login",
+  "start_url": "/restaurando-vidas/",
   "scope": "/restaurando-vidas/",
   "display": "standalone",
   "background_color": "#0A0A0A",
