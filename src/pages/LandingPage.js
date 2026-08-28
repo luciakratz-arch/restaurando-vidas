@@ -35,6 +35,8 @@ export default function LandingPage() {
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
+  const [showInstalarModal, setShowInstalarModal] = useState(false);
+
   const instalarApp = () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
@@ -44,7 +46,7 @@ export default function LandingPage() {
     } else if (isIOS) {
       setShowIOSModal(true);
     } else {
-      navigate('/login');
+      setShowInstalarModal(true);
     }
   };
 
@@ -52,6 +54,46 @@ export default function LandingPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#0A0A0A', color: '#F5F0E8', fontFamily: 'Raleway, sans-serif' }}>
+
+      {/* Modal Instruções Instalar */}
+      {showInstalarModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div style={{ background: '#111', borderRadius: 20, padding: 32, width: '100%', maxWidth: 480, border: '1px solid rgba(212,175,55,0.4)' }}>
+            <div style={{ fontWeight: 700, fontSize: 20, color: '#D4AF37', marginBottom: 8, fontFamily: 'Cinzel, serif' }}>📲 Instalar o App</div>
+            <p style={{ color: '#9A9080', fontSize: 14, marginBottom: 24 }}>Siga as instruções para instalar o Restaurando Vidas no seu dispositivo:</p>
+
+            <div style={{ background: 'rgba(212,175,55,0.08)', borderRadius: 12, padding: 16, marginBottom: 16, border: '1px solid rgba(212,175,55,0.2)' }}>
+              <div style={{ fontWeight: 700, color: '#D4AF37', marginBottom: 10, fontSize: 14 }}>🤖 Android (Chrome):</div>
+              <p style={{ color: '#9A9080', fontSize: 13, margin: '0 0 6px' }}>1. Toque nos <strong style={{ color: '#F5F0E8' }}>3 pontinhos ⋮</strong> no canto superior direito</p>
+              <p style={{ color: '#9A9080', fontSize: 13, margin: '0 0 6px' }}>2. Toque em <strong style={{ color: '#F5F0E8' }}>"Adicionar à tela inicial"</strong></p>
+              <p style={{ color: '#9A9080', fontSize: 13, margin: 0 }}>3. Toque em <strong style={{ color: '#F5F0E8' }}>Adicionar</strong></p>
+            </div>
+
+            <div style={{ background: 'rgba(212,175,55,0.08)', borderRadius: 12, padding: 16, marginBottom: 16, border: '1px solid rgba(212,175,55,0.2)' }}>
+              <div style={{ fontWeight: 700, color: '#D4AF37', marginBottom: 10, fontSize: 14 }}>🖥️ Desktop (Chrome):</div>
+              <p style={{ color: '#9A9080', fontSize: 13, margin: '0 0 6px' }}>1. Clique no ícone <strong style={{ color: '#F5F0E8' }}>⊕</strong> na barra de endereços (canto direito)</p>
+              <p style={{ color: '#9A9080', fontSize: 13, margin: 0 }}>2. Clique em <strong style={{ color: '#F5F0E8' }}>"Instalar"</strong></p>
+            </div>
+
+            <div style={{ background: 'rgba(212,175,55,0.08)', borderRadius: 12, padding: 16, marginBottom: 24, border: '1px solid rgba(212,175,55,0.2)' }}>
+              <div style={{ fontWeight: 700, color: '#D4AF37', marginBottom: 10, fontSize: 14 }}>🍎 iPhone (Safari):</div>
+              <p style={{ color: '#9A9080', fontSize: 13, margin: '0 0 6px' }}>1. Toque em <strong style={{ color: '#F5F0E8' }}>compartilhar ⬆️</strong> na barra inferior</p>
+              <p style={{ color: '#9A9080', fontSize: 13, margin: '0 0 6px' }}>2. Toque em <strong style={{ color: '#F5F0E8' }}>"Adicionar à Tela de Início"</strong></p>
+              <p style={{ color: '#9A9080', fontSize: 13, margin: 0 }}>3. Toque em <strong style={{ color: '#F5F0E8' }}>Adicionar</strong></p>
+            </div>
+
+            <p style={{ fontSize: 12, color: '#5A5048', marginBottom: 20, textAlign: 'center' }}>
+              Após instalar, abra o app e faça login com seu <strong style={{ color: '#9A9080' }}>e-mail e senha</strong> cadastrados.
+            </p>
+
+            <button onClick={() => setShowInstalarModal(false)} style={{
+              width: '100%', padding: 14, borderRadius: 12, border: 'none',
+              background: '#D4AF37', color: '#000', fontWeight: 700,
+              fontSize: 15, cursor: 'pointer', fontFamily: 'Raleway',
+            }}>Entendido ✓</button>
+          </div>
+        </div>
+      )}
 
       {/* Modal iOS */}
       {showIOSModal && (
