@@ -1,7 +1,7 @@
 // src/pages/ParticipantesPage.js
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import { collection, query, onSnapshot, doc, setDoc, updateDoc, serverTimestamp, addDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, updateDoc, serverTimestamp, addDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -60,6 +60,16 @@ export default function ParticipantesPage() {
     setShowForm(true);
   };
 
+  const excluirParticipante = async (p) => {
+    if (!window.confirm(`Excluir "${p.nome}"? Esta ação não pode ser desfeita.`)) return;
+    try { await deleteDoc(doc(db, 'participantes', p.id)); } catch (err) { console.error(err); }
+  };
+
+  const excluirParceiro = async (p) => {
+    if (!window.confirm(`Excluir parceiro "${p.nome}"? Esta ação não pode ser desfeita.`)) return;
+    try { await deleteDoc(doc(db, 'parceiros', p.id)); } catch (err) { console.error(err); }
+  };
+
   const tipoLabel = {
     responsavel_tecnico: 'Responsável Técnico(a)',
     estagiario: 'Estagiário(a)',
@@ -72,6 +82,11 @@ export default function ParticipantesPage() {
     estagiario: 'badge-success',
     profissional: 'badge-warning',
     colaborador: 'badge-info',
+  };
+
+  const btnExcluir = {
+    background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)',
+    color: '#EF4444', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 12,
   };
 
   const responsaveis = participantes.filter(p => p.tipo === 'responsavel_tecnico' && p.ativo);
@@ -89,7 +104,10 @@ export default function ParticipantesPage() {
             <button className="btn btn-outline" onClick={() => { setShowParceiro(!showParceiro); setShowForm(false); }}>
               + Parceiro
             </button>
-            <button className="btn btn-gold" onClick={() => { setShowForm(!showForm); setShowParceiro(false); setEditando(null); setForm({ nome: '', cargo: '', tipo: 'responsavel_tecnico', especializacao: '', curriculo: '', email: '', foto: '', ativo: true }); }}>
+            <button className="btn btn-gold" onClick={() => {
+              setShowForm(!showForm); setShowParceiro(false); setEditando(null);
+              setForm({ nome: '', cargo: '', tipo: 'responsavel_tecnico', especializacao: '', curriculo: '', email: '', foto: '', ativo: true });
+            }}>
               + Participante
             </button>
           </div>
@@ -129,7 +147,7 @@ export default function ParticipantesPage() {
                 <label className="form-label">Especialização / Titulação</label>
                 <input className="form-control" value={form.especializacao}
                   onChange={(e) => setForm(p => ({ ...p, especializacao: e.target.value }))}
-                  placeholder="Ex: Doutora em Psicologia, Especialista em TCC e Neuromodulação" />
+                  placeholder="Ex: Doutora em Psicologia, Especialista em TCC" />
               </div>
               <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                 <label className="form-label">Mini Currículo</label>
@@ -202,9 +220,10 @@ export default function ParticipantesPage() {
                   <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>✉ {p.email}</div>
                 )}
                 {isGestora && (
-                  <button className="btn btn-outline btn-sm" style={{ marginTop: 12 }} onClick={() => abrirEdicao(p)}>
-                    ✎ Editar
-                  </button>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                    <button className="btn btn-outline btn-sm" onClick={() => abrirEdicao(p)}>✎ Editar</button>
+                    <button style={btnExcluir} onClick={() => excluirParticipante(p)}>🗑 Excluir</button>
+                  </div>
                 )}
               </div>
             ))}
@@ -229,7 +248,10 @@ export default function ParticipantesPage() {
                 {p.especializacao && <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>{p.especializacao}</div>}
                 {p.curriculo && <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{p.curriculo}</p>}
                 {isGestora && (
-                  <button className="btn btn-outline btn-sm" style={{ marginTop: 10 }} onClick={() => abrirEdicao(p)}>✎ Editar</button>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                    <button className="btn btn-outline btn-sm" onClick={() => abrirEdicao(p)}>✎ Editar</button>
+                    <button style={btnExcluir} onClick={() => excluirParticipante(p)}>🗑 Excluir</button>
+                  </div>
                 )}
               </div>
             ))}
@@ -251,6 +273,11 @@ export default function ParticipantesPage() {
                     className="btn btn-outline btn-sm" style={{ marginTop: 12 }}>
                     Visitar Site →
                   </a>
+                )}
+                {isGestora && (
+                  <div style={{ marginTop: 12 }}>
+                    <button style={btnExcluir} onClick={() => excluirParceiro(p)}>🗑 Excluir</button>
+                  </div>
                 )}
               </div>
             ))}
