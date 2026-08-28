@@ -36,8 +36,6 @@
         deferredPrompt = e;
         var lbl = document.getElementById('btn-instalar-label');
         if (lbl) lbl.textContent = 'Instalar App Agora';
-        var bloco = document.getElementById('bloco-instalar-app');
-        if (bloco) bloco.style.display = 'flex';
       });
 
       window.addEventListener('appinstalled', function () {
@@ -72,7 +70,7 @@
         } else if (isIOS) {
           document.getElementById('modal-ios-pwa').style.display = 'flex';
         } else {
-          window.location.href = '/restaurando-vidas/#/login';
+          document.getElementById('modal-android-pwa').style.display = 'flex';
         }
       };
     })();
@@ -85,25 +83,50 @@
       <div style="background:#111;border-radius:20px 20px 0 0;
         padding:28px 24px 40px;width:100%;max-width:480px;
         border-top:2px solid #D4AF37;">
-        <div style="width:40px;height:4px;background:#333;
-          border-radius:2px;margin:0 auto 24px;"></div>
-        <div style="font-weight:700;font-size:17px;margin-bottom:20px;color:#D4AF37;">
-          📱 Instalar no iPhone
-        </div>
+        <div style="width:40px;height:4px;background:#333;border-radius:2px;margin:0 auto 24px;"></div>
+        <div style="font-weight:700;font-size:17px;margin-bottom:20px;color:#D4AF37;">📱 Instalar no iPhone</div>
         <p style="color:#9A9080;margin-bottom:12px;">1. Toque em <strong style="color:#F5F0E8;">compartilhar ⬆️</strong> na barra do Safari</p>
         <p style="color:#9A9080;margin-bottom:12px;">2. Toque em <strong style="color:#F5F0E8;">"Adicionar à Tela de Início"</strong></p>
         <p style="color:#9A9080;margin-bottom:16px;">3. Toque em <strong style="color:#F5F0E8;">Adicionar</strong></p>
-        <p style="background:rgba(212,175,55,0.1);padding:10px;border-radius:8px;
-          font-size:13px;color:#D4AF37;border-left:3px solid #D4AF37;margin-bottom:16px;">
+        <p style="background:rgba(212,175,55,0.1);padding:10px;border-radius:8px;font-size:13px;color:#D4AF37;border-left:3px solid #D4AF37;margin-bottom:16px;">
           ⚠️ Precisa estar no <strong>Safari</strong>, não no Chrome.
         </p>
         <button onclick="document.getElementById('modal-ios-pwa').style.display='none'"
-          style="width:100%;padding:14px;border-radius:12px;border:none;
-          background:#D4AF37;color:#000;font-weight:700;
-          font-size:15px;cursor:pointer;">
+          style="width:100%;padding:14px;border-radius:12px;border:none;background:#D4AF37;color:#000;font-weight:700;font-size:15px;cursor:pointer;">
           Entendido
         </button>
       </div>
     </div>
+
+    <!-- Modal Android/Desktop -->
+    <div id="modal-android-pwa" style="display:none;position:fixed;inset:0;
+      background:rgba(0,0,0,0.7);z-index:9999;align-items:flex-end;
+      justify-content:center;backdrop-filter:blur(4px);">
+      <div style="background:#111;border-radius:20px 20px 0 0;
+        padding:28px 24px 40px;width:100%;max-width:480px;
+        border-top:2px solid #D4AF37;">
+        <div style="width:40px;height:4px;background:#333;border-radius:2px;margin:0 auto 24px;"></div>
+        <div style="font-weight:700;font-size:17px;margin-bottom:20px;color:#D4AF37;">📲 Instalar o App</div>
+        <div style="background:rgba(212,175,55,0.08);border-radius:12px;padding:16px;margin-bottom:16px;border:1px solid rgba(212,175,55,0.2);">
+          <div style="font-weight:700;color:#D4AF37;margin-bottom:10px;font-size:14px;">🤖 Android (Chrome)</div>
+          <p style="color:#9A9080;font-size:13px;margin-bottom:6px;">1. Toque nos <strong style="color:#F5F0E8;">3 pontinhos ⋮</strong> no canto superior direito</p>
+          <p style="color:#9A9080;font-size:13px;margin-bottom:6px;">2. Toque em <strong style="color:#F5F0E8;">"Adicionar à tela inicial"</strong></p>
+          <p style="color:#9A9080;font-size:13px;">3. Toque em <strong style="color:#F5F0E8;">Adicionar</strong></p>
+        </div>
+        <div style="background:rgba(212,175,55,0.08);border-radius:12px;padding:16px;margin-bottom:24px;border:1px solid rgba(212,175,55,0.2);">
+          <div style="font-weight:700;color:#D4AF37;margin-bottom:10px;font-size:14px;">🖥️ Desktop (Chrome)</div>
+          <p style="color:#9A9080;font-size:13px;margin-bottom:6px;">1. Clique no ícone <strong style="color:#F5F0E8;">⊕</strong> na barra de endereços</p>
+          <p style="color:#9A9080;font-size:13px;">2. Clique em <strong style="color:#F5F0E8;">"Instalar"</strong></p>
+        </div>
+        <p style="font-size:12px;color:#5A5048;text-align:center;margin-bottom:20px;">
+          Após instalar, faça login com seu <strong style="color:#9A9080;">e-mail e senha</strong> cadastrados.
+        </p>
+        <button onclick="document.getElementById('modal-android-pwa').style.display='none'"
+          style="width:100%;padding:14px;border-radius:12px;border:none;background:#D4AF37;color:#000;font-weight:700;font-size:15px;cursor:pointer;">
+          Entendido
+        </button>
+      </div>
+    </div>
+
   </body>
 </html>
