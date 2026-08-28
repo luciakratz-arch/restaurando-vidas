@@ -316,7 +316,7 @@ export default function LandingPage() {
             padding: '18px 48px', borderRadius: 10, background: 'transparent',
             border: '1px solid rgba(212,175,55,0.4)', color: '#D4AF37',
             cursor: 'pointer', fontFamily: 'Raleway', fontWeight: 600, fontSize: 18,
-          }}>📲 Baixar o App</button>
+          }}>↓ Baixar o App</button>
         </div>
       </section>
 
