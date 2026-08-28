@@ -38,6 +38,7 @@ export default function LandingPage() {
   const [showInstalarModal, setShowInstalarModal] = useState(false);
 
   const instalarApp = () => {
+    if (instalado) return;
     if (deferredPrompt) {
       deferredPrompt.prompt();
       deferredPrompt.userChoice.then((result) => {
@@ -180,6 +181,14 @@ export default function LandingPage() {
             border: '1px solid rgba(212,175,55,0.3)', color: '#9A9080',
             cursor: 'pointer', fontFamily: 'Raleway', fontWeight: 600, fontSize: 16,
           }}>Já tenho acesso</button>
+          <button onClick={instalarApp} disabled={instalado} style={{
+            padding: '16px 40px', borderRadius: 10,
+            background: instalado ? 'rgba(34,197,94,0.2)' : 'rgba(212,175,55,0.15)',
+            border: `1px solid ${instalado ? '#22C55E' : 'rgba(212,175,55,0.6)'}`,
+            color: instalado ? '#22C55E' : '#D4AF37',
+            cursor: instalado ? 'default' : 'pointer',
+            fontFamily: 'Raleway', fontWeight: 600, fontSize: 16,
+          }}>{instalado ? '✅ App Instalado!' : '↓ Baixar o App'}</button>
         </div>
       </section>
 
