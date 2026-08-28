@@ -1,0 +1,25 @@
+{
+  "name": "Restaurando Vidas",
+  "short_name": "Rest. Vidas",
+  "description": "Sistema de Gestão Clínica — Restaurando Vidas · Cuidado da Alma",
+  "start_url": "/restaurando-vidas/#/login",
+  "scope": "/restaurando-vidas/",
+  "display": "standalone",
+  "background_color": "#0A0A0A",
+  "theme_color": "#D4AF37",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
