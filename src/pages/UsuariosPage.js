@@ -10,6 +10,72 @@ import { sendPasswordResetEmail } from 'firebase/auth';
 import { useAuth, ROLES } from '../contexts/AuthContext';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import jsPDF from 'jspdf';
+
+async function gerarRelatorioPacientes(pacientes, users) {
+  const d = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const W = 297;
+
+  // Cabeçalho
+  d.setFillColor(245, 245, 245);
+  d.rect(0, 0, W, 32, 'F');
+  d.setFontSize(16); d.setFont('helvetica', 'bold'); d.setTextColor(30, 30, 30);
+  d.text('RELATÓRIO DE PACIENTES', 14, 13);
+  d.setFontSize(9); d.setFont('helvetica', 'normal'); d.setTextColor(100, 100, 100);
+  d.text('Restaurando Vidas · Cuidado da Alma · Apoio Psicológico Gratuito', 14, 20);
+  d.text('Emitido em: ' + format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR }), 14, 26);
+  d.text('Total de pacientes: ' + pacientes.length, W - 60, 20);
+
+  // Cabeçalho tabela
+  let y = 40;
+  const cols = [
+    { label: 'Nome', x: 14, w: 50 },
+    { label: 'Telefone', x: 66, w: 32 },
+    { label: 'Demanda', x: 100, w: 55 },
+    { label: 'Estagiário(s)', x: 157, w: 45 },
+    { label: 'Profissional', x: 204, w: 40 },
+    { label: 'Status', x: 246, w: 25 },
+    { label: 'Cadastro', x: 273, w: 22 },
+  ];
+
+  const getNomes = (ids) => {
+    if (!ids || ids.length === 0) return '—';
+    if (typeof ids === 'string') return users.find(u => u.id === ids)?.nome || '—';
+    return ids.map(id => users.find(u => u.id === id)?.nome).filter(Boolean).join(', ') || '—';
+  };
+
+  const fmtDate = (ts) => ts?.toDate ? format(ts.toDate(), 'dd/MM/yy', { locale: ptBR }) : '—';
+
+  // Header linha
+  d.setFillColor(30, 30, 30);
+  d.rect(12, y - 5, W - 24, 8, 'F');
+  d.setFontSize(8); d.setFont('helvetica', 'bold'); d.setTextColor(212, 175, 55);
+  cols.forEach(c => d.text(c.label, c.x, y));
+  y += 6;
+
+  // Linhas
+  d.setFont('helvetica', 'normal'); d.setTextColor(30, 30, 30);
+  pacientes.forEach((p, i) => {
+    if (y > 185) { d.addPage(); y = 20; }
+    if (i % 2 === 0) { d.setFillColor(248, 248, 248); d.rect(12, y - 4, W - 24, 7, 'F'); }
+    d.setFontSize(8);
+    const truncate = (str, max) => str && str.length > max ? str.substring(0, max) + '...' : (str || '—');
+    d.text(truncate(p.nome, 28), cols[0].x, y);
+    d.text(truncate(p.telefone, 16), cols[1].x, y);
+    d.text(truncate(p.demanda, 30), cols[2].x, y);
+    d.text(truncate(getNomes(p.alunosResponsaveis || p.alunoResponsavel), 24), cols[3].x, y);
+    d.text(truncate(getNomes(p.profissionalResponsavel), 20), cols[4].x, y);
+    d.text(p.status || '—', cols[5].x, y);
+    d.text(fmtDate(p.createdAt), cols[6].x, y);
+    y += 7;
+  });
+
+  // Rodapé
+  d.setFontSize(8); d.setTextColor(150, 150, 150);
+  d.text('Lucia Kratz · Psicóloga · CRP 09/20590 · Responsável Técnica', 14, 200);
+
+  d.save('relatorio_pacientes_' + format(new Date(), 'dd-MM-yyyy') + '.pdf');
+}
 
 const ROLE_LABELS = {
   [ROLES.GESTORA]: 'Gestora',
@@ -234,6 +300,13 @@ export default function UsuariosPage() {
       )}
 
       {/* ABA PACIENTES */}
+      {aba === 'pacientes' && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+          <button className="btn btn-outline btn-sm" onClick={() => gerarRelatorioPacientes(pacientes, users)}>
+            📄 Gerar Relatório PDF
+          </button>
+        </div>
+      )}
       {aba === 'pacientes' && (
         <div className="table-container">
           <table>
