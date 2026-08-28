@@ -47,7 +47,8 @@ export default function LandingPage() {
     } else if (isIOS) {
       setShowIOSModal(true);
     } else {
-      setShowInstalarModal(true);
+      // Android/Desktop ainda não capturou o prompt — orienta o usuário
+      alert('Para instalar: clique no ícone ⊕ na barra de endereços do Chrome (canto direito superior) e clique em "Instalar".');
     }
   };
 
