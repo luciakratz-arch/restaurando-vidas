@@ -3,14 +3,107 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0A0A0A" />
+    <meta name="theme-color" content="#D4AF37" />
     <meta name="description" content="Restaurando Vidas — Sistema de Gestão Clínica e Apoio Psicológico" />
-    <title>Restaurando Vidas</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Rest. Vidas" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>Restaurando Vidas</title>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('%PUBLIC_URL%/sw.js').catch(function () {});
+        });
+      }
+    </script>
   </head>
   <body>
     <noscript>Você precisa habilitar o JavaScript para usar este sistema.</noscript>
     <div id="root"></div>
+
+    <!-- PWA Install Logic -->
+    <script>
+    (function () {
+      var deferredPrompt = null;
+      var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+
+      window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        deferredPrompt = e;
+        var lbl = document.getElementById('btn-instalar-label');
+        if (lbl) lbl.textContent = 'Instalar App Agora';
+        var bloco = document.getElementById('bloco-instalar-app');
+        if (bloco) bloco.style.display = 'flex';
+      });
+
+      window.addEventListener('appinstalled', function () {
+        deferredPrompt = null;
+        mostrarInstalado();
+      });
+
+      function mostrarInstalado() {
+        var bloco = document.getElementById('bloco-instalar-app');
+        if (bloco) {
+          bloco.innerHTML =
+            '<div style="display:flex;flex-direction:column;gap:12px;width:100%;">' +
+            '<div style="display:flex;align-items:center;gap:10px;">' +
+            '<span style="font-size:28px;">✅</span>' +
+            '<div>' +
+            '<div style="font-weight:700;font-size:17px;color:#F5F0E8;">App instalado com sucesso!</div>' +
+            '<div style="font-size:14px;color:#9A9080;margin-top:2px;">Agora abra o app e faça login.</div>' +
+            '</div></div>' +
+            '<div style="font-size:14px;color:#F5F0E8;background:rgba(212,175,55,0.1);' +
+            'border-radius:10px;padding:12px 16px;border-left:3px solid #D4AF37;">' +
+            '📌 Abra o ícone do app na sua tela inicial e faça login com seu e-mail e senha.' +
+            '</div></div>';
+        }
+      }
+
+      window.acionarInstalacaoApp = function () {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(function (result) {
+            if (result.outcome === 'accepted') deferredPrompt = null;
+          });
+        } else if (isIOS) {
+          document.getElementById('modal-ios-pwa').style.display = 'flex';
+        } else {
+          window.location.href = '/restaurando-vidas/#/login';
+        }
+      };
+    })();
+    </script>
+
+    <!-- Modal iOS -->
+    <div id="modal-ios-pwa" style="display:none;position:fixed;inset:0;
+      background:rgba(0,0,0,0.7);z-index:9999;align-items:flex-end;
+      justify-content:center;backdrop-filter:blur(4px);">
+      <div style="background:#111;border-radius:20px 20px 0 0;
+        padding:28px 24px 40px;width:100%;max-width:480px;
+        border-top:2px solid #D4AF37;">
+        <div style="width:40px;height:4px;background:#333;
+          border-radius:2px;margin:0 auto 24px;"></div>
+        <div style="font-weight:700;font-size:17px;margin-bottom:20px;color:#D4AF37;">
+          📱 Instalar no iPhone
+        </div>
+        <p style="color:#9A9080;margin-bottom:12px;">1. Toque em <strong style="color:#F5F0E8;">compartilhar ⬆️</strong> na barra do Safari</p>
+        <p style="color:#9A9080;margin-bottom:12px;">2. Toque em <strong style="color:#F5F0E8;">"Adicionar à Tela de Início"</strong></p>
+        <p style="color:#9A9080;margin-bottom:16px;">3. Toque em <strong style="color:#F5F0E8;">Adicionar</strong></p>
+        <p style="background:rgba(212,175,55,0.1);padding:10px;border-radius:8px;
+          font-size:13px;color:#D4AF37;border-left:3px solid #D4AF37;margin-bottom:16px;">
+          ⚠️ Precisa estar no <strong>Safari</strong>, não no Chrome.
+        </p>
+        <button onclick="document.getElementById('modal-ios-pwa').style.display='none'"
+          style="width:100%;padding:14px;border-radius:12px;border:none;
+          background:#D4AF37;color:#000;font-weight:700;
+          font-size:15px;cursor:pointer;">
+          Entendido
+        </button>
+      </div>
+    </div>
   </body>
 </html>
